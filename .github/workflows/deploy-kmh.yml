@@ -3,8 +3,7 @@ name: Deploy kmh to EC2
 on:
   push:
     branches:
-      - develop
-      - wooree
+      - main
   workflow_dispatch:
 
 concurrency:
