@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발주 상세 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:700;color:#374151}
+        .form-input,.form-select,.form-textarea{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .form-input[readonly]{background:#f9fafb;color:#6b7280}
+        .form-textarea{min-height:96px;resize:vertical}
+        .data-table{width:100%;border-collapse:separate;border-spacing:0}
+        .data-table th{background:#f9fafb;padding:.75rem;text-align:left;font-size:.75rem;font-weight:800;color:#6b7280;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+        .data-table td{padding:.75rem;font-size:.875rem;color:#374151;border-bottom:1px solid #f3f4f6;vertical-align:top}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">발주 상세</h1>
+                    <p id="message" class="text-sm text-gray-500 mt-1">발주 정보를 불러오는 중입니다.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" id="btn-back" class="px-4 py-2 text-sm font-bold rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">목록</button>
+                <button type="button" id="btn-approve" class="px-4 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> 승인
+                </button>
+                <button type="button" id="btn-save" class="px-4 py-2 text-sm font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i> 저장
+                </button>
+            </div>
+        </header>
+        <main class="content_area p-6 max-w-7xl mx-auto">
+            <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-6">
+                <div class="p-5 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-800">기본 정보</h2>
+                </div>
+                <div class="p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                    <label><span class="form-label">발주번호</span><input id="purchase-order-no" class="form-input" readonly></label>
+                    <label><span class="form-label">거래처</span><input id="vendor-name" class="form-input" readonly></label>
+                    <label><span class="form-label">요청자</span><input id="requested-by" class="form-input" readonly></label>
+                    <label><span class="form-label">상태</span><input id="status" class="form-input" readonly></label>
+                    <label><span class="form-label">발주일</span><input id="order-date" class="form-input" readonly></label>
+                    <label><span class="form-label">희망 납기일</span><input id="expected-date" type="date" class="form-input"></label>
+                    <label><span class="form-label">승인자</span><select id="approved-by-member-id" class="form-select"></select></label>
+                    <label><span class="form-label">총 금액</span><input id="total-amount" class="form-input" readonly></label>
+                    <label class="md:col-span-2 xl:col-span-4"><span class="form-label">메모</span><textarea id="note" class="form-textarea"></textarea></label>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-800">발주 품목</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>품목</th>
+                                <th>수량</th>
+                                <th>단가</th>
+                                <th>품목 납기일</th>
+                                <th>메모</th>
+                                <th>합계</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-body">
+                            <tr><td colspan="6" class="text-center text-gray-400 font-semibold py-8">발주 품목을 불러오는 중입니다.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-purchase-order-detail-page.js"></script>
+    
+
+</body>
+</html>

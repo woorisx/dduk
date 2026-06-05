@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 세금계산서</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <link rel="stylesheet" href="../../../styles/accounting/tax-invoice.css">
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색" aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area tax_invoice_page">
+      <section class="page_header">
+        <div class="page_title_area">
+          <h2>세금계산서</h2>
+          <p>매출/매입 세금계산서를 등록하고 발급, 전송, 실패, 취소, 수정발급 상태를 관리합니다.</p>
+        </div>
+        <div class="header_actions">
+          <button id="reloadButton" class="erp_btn erp_btn_secondary" type="button">
+            <i data-lucide="refresh-cw"></i>
+            새로고침
+          </button>
+        </div>
+      </section>
+
+      <section class="tax_invoice_toolbar">
+        <div class="toolbar_hint">매출과 매입을 같은 화면에서 등록하고 조회합니다.</div>
+        <div class="filter_group">
+          <select id="typeFilter" class="erp_select" aria-label="매출/매입">
+            <option value="">전체 유형</option>
+            <option value="SALES">매출</option>
+            <option value="PURCHASE">매입</option>
+          </select>
+          <select id="statusFilter" class="erp_select" aria-label="상태">
+            <option value="">전체 상태</option>
+            <option value="DRAFT">작성중</option>
+            <option value="ISSUE_REQUESTED">발급요청</option>
+            <option value="ISSUED">발급완료</option>
+            <option value="SEND_FAILED">전송실패</option>
+            <option value="SENT">전송완료</option>
+            <option value="CANCELLED">취소</option>
+            <option value="AMENDED">수정발급</option>
+          </select>
+          <input id="keywordFilter" class="erp_input" type="search" placeholder="번호, 거래처, 승인번호" aria-label="검색어">
+        </div>
+      </section>
+
+      <section class="tax_invoice_list_panel" id="taxInvoiceListPanel">
+        <div class="section_head">
+          <div>
+            <h3>목록</h3>
+            <span id="listSummary">0건</span>
+          </div>
+          <button id="hideListButton" class="erp_btn erp_btn_secondary" type="button">
+            <i data-lucide="chevron-up"></i>
+            목록 닫기
+          </button>
+        </div>
+        <div class="erp_table_container">
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th>번호</th>
+                <th>작성일자</th>
+                <th>거래처</th>
+                <th class="amount">공급가액</th>
+                <th class="amount">부가세</th>
+                <th class="amount">합계</th>
+                <th>상태</th>
+                <th>승인번호</th>
+                <th>처리</th>
+              </tr>
+            </thead>
+            <tbody id="taxInvoiceListBody"></tbody>
+          </table>
+        </div>
+        <div id="taxInvoicePagination" class="pagination_bar" aria-label="세금계산서 페이지"></div>
+      </section>
+
+      <section class="tax_invoice_grid">
+        <form id="taxInvoiceForm" class="tax_invoice_form">
+          <div class="section_head">
+            <div>
+              <h3>등록</h3>
+              <span id="formTypeLabel">매출 세금계산서</span>
+            </div>
+            <button id="resetFormButton" class="erp_btn erp_btn_secondary erp_btn_icon" type="button" aria-label="초기화">
+              <i data-lucide="rotate-ccw"></i>
+            </button>
+          </div>
+
+          <div class="form_grid">
+            <div class="erp_form_group">
+              <label class="erp_label" for="issueDate">작성일자</label>
+              <input id="issueDate" class="erp_input" type="date" required>
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="taxInvoiceType">거래 유형</label>
+              <select id="taxInvoiceType" class="erp_select" required>
+                <option value="SALES">매출</option>
+                <option value="PURCHASE">매입</option>
+              </select>
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="vatType">부가세 유형</label>
+              <select id="vatType" class="erp_select" required>
+                <option value="TAX_INVOICE">세금계산서</option>
+                <option value="PURCHASER_ISSUED_TAX_INVOICE">매입자발행세금계산서</option>
+                <option value="ZERO_TAX">영세율</option>
+                <option value="INVOICE">계산서</option>
+                <option value="TAX_FREE">면세</option>
+                <option value="EXPORT">수출</option>
+                <option value="OTHER_SALES">기타</option>
+              </select>
+            </div>
+            <section class="party_grid form_full" aria-label="공급자와 공급받는자 정보">
+              <div class="party_panel">
+                <div class="party_panel_head">
+                  <div>
+                    <h4>공급자</h4>
+                    <span>세금계산서를 발행하는 사업자</span>
+                  </div>
+                  <span class="erp_badge" style="font-size:.75rem;font-weight:700;color:#047857;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:.375rem;padding:.25rem .625rem;display:inline-flex;align-items:center;gap:.25rem;">
+                    <i data-lucide="building-2" style="width:.875rem;height:.875rem"></i>
+                    (주)아망티 기본 적용
+                  </span>
+                </div>
+                <div class="party_fields">
+                  <label class="erp_form_group">
+                    <span class="erp_label">상호</span>
+                    <input id="supplierName" class="erp_input" required placeholder="공급자 상호" readonly style="background:#f9fafb;cursor:default">
+                  </label>
+                  <label class="erp_form_group">
+                    <span class="erp_label">사업자번호</span>
+                    <input id="supplierBusinessNo" class="erp_input" inputmode="numeric" required placeholder="123-45-67890" readonly style="background:#f9fafb;cursor:default">
+                  </label>
+                  <label class="erp_form_group">
+                    <span class="erp_label">이메일</span>
+                    <input id="supplierEmail" class="erp_input" type="email" placeholder="tax@example.com" readonly style="background:#f9fafb;cursor:default">
+                  </label>
+                  <input id="supplierRepresentativeName" type="hidden">
+                </div>
+              </div>
+
+              <div class="party_panel">
+                <div class="party_panel_head">
+                  <div>
+                    <h4>공급받는자</h4>
+                    <span>세금계산서를 수취하는 사업자</span>
+                  </div>
+                  <button class="erp_btn erp_btn_secondary" type="button" data-vendor-lookup="recipient">
+                    <i data-lucide="search"></i>
+                    검색
+                  </button>
+                </div>
+                <div class="party_fields">
+                  <label class="erp_form_group">
+                    <span class="erp_label">상호</span>
+                    <input id="recipientName" class="erp_input" required placeholder="공급받는자 상호">
+                  </label>
+                  <label class="erp_form_group">
+                    <span class="erp_label">사업자번호</span>
+                    <input id="recipientBusinessNo" class="erp_input" inputmode="numeric" required placeholder="123-45-67890">
+                  </label>
+                  <label class="erp_form_group">
+                    <span class="erp_label">이메일</span>
+                    <input id="recipientEmail" class="erp_input" type="email" placeholder="tax@example.com">
+                  </label>
+                  <input id="recipientRepresentativeName" type="hidden">
+                </div>
+              </div>
+            </section>
+            <div class="erp_form_group form_full">
+              <label class="erp_label" for="itemName">품목</label>
+              <div class="lookup_field">
+                <input id="itemName" class="erp_input" placeholder="품목명">
+                <button class="erp_btn erp_btn_secondary erp_btn_icon" type="button" id="itemLookupButton" aria-label="품목 검색">
+                  <i data-lucide="search"></i>
+                </button>
+              </div>
+              <div class="item_meta">
+                <input id="itemUnit" type="hidden">
+                <input id="itemUnitPrice" type="hidden">
+                <span id="itemMetaText">품목을 검색해 선택할 수 있습니다.</span>
+              </div>
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="quantity">수량</label>
+              <input id="quantity" class="erp_input" inputmode="decimal" placeholder="1">
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="lineUnitPrice">단가</label>
+              <input id="lineUnitPrice" class="erp_input" inputmode="decimal" placeholder="0">
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="supplyAmount">공급가액</label>
+              <input id="supplyAmount" class="erp_input" inputmode="decimal" placeholder="0">
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="vatAmount">부가세</label>
+              <input id="vatAmount" class="erp_input" inputmode="decimal" placeholder="0">
+            </div>
+            <div class="erp_form_group">
+              <label class="erp_label" for="totalAmount">합계금액</label>
+              <input id="totalAmount" class="erp_input" readonly placeholder="0">
+            </div>
+            <div class="erp_form_group form_full">
+              <div class="line_actions">
+                <button class="erp_btn erp_btn_secondary" type="button" id="purchaseOrderLookupButton">
+                  <i data-lucide="clipboard-list"></i>
+                  발주서 불러오기
+                </button>
+                <button class="erp_btn erp_btn_secondary" type="button" id="addLineButton">
+                  <i data-lucide="plus"></i>
+                  품목 추가
+                </button>
+              </div>
+              <div class="line_table_wrap">
+                <table class="erp_table line_table">
+                  <thead>
+                    <tr>
+                      <th>품목</th>
+                      <th class="amount">수량</th>
+                      <th>단위</th>
+                      <th class="amount">단가</th>
+                      <th class="amount">공급가액</th>
+                      <th class="amount">부가세</th>
+                      <th class="amount">합계</th>
+                      <th>삭제</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lineListBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="erp_form_group form_full">
+              <label class="erp_label" for="memo">메모</label>
+              <textarea id="memo" class="erp_textarea" rows="3" placeholder="내부 관리 메모"></textarea>
+            </div>
+          </div>
+
+          <div class="form_actions">
+            <button class="erp_btn erp_btn_primary" type="submit">
+              <i data-lucide="save"></i>
+              저장
+            </button>
+          </div>
+        </form>
+
+      </section>
+    </main>
+  </div>
+
+  <div id="statusDialog" class="modal_overlay" aria-hidden="true">
+    <div class="status_dialog" role="dialog" aria-modal="true" aria-labelledby="statusDialogTitle">
+      <div class="section_head">
+        <div>
+          <h3 id="statusDialogTitle">상태 처리</h3>
+          <span id="statusDialogSubtitle"></span>
+        </div>
+        <button id="statusDialogClose" class="erp_btn erp_btn_secondary erp_btn_icon" type="button" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="statusForm" class="status_form">
+        <input id="statusInvoiceId" type="hidden">
+        <input id="statusAction" type="hidden">
+        <div class="erp_form_group" data-status-field="approval">
+          <label class="erp_label" for="approvalNo">승인번호</label>
+          <input id="approvalNo" class="erp_input" placeholder="외부 승인번호">
+        </div>
+        <div class="erp_form_group" data-status-field="external">
+          <label class="erp_label" for="externalStatus">외부 상태</label>
+          <input id="externalStatus" class="erp_input" placeholder="ASP/Hometax 상태">
+        </div>
+        <div class="erp_form_group" data-status-field="reason">
+          <label class="erp_label" for="statusReason">사유</label>
+          <textarea id="statusReason" class="erp_textarea" rows="3" placeholder="실패, 취소, 수정발급 사유"></textarea>
+        </div>
+        <div class="form_actions">
+          <button class="erp_btn erp_btn_secondary" type="button" id="statusCancelButton">취소</button>
+          <button class="erp_btn erp_btn_primary" type="submit">처리</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="detailDialog" class="modal_overlay" aria-hidden="true">
+    <div class="detail_dialog" role="dialog" aria-modal="true" aria-labelledby="detailDialogTitle">
+      <div class="section_head">
+        <div>
+          <h3 id="detailDialogTitle">세금계산서 상세</h3>
+          <span id="detailDialogSubtitle"></span>
+        </div>
+        <button id="detailDialogClose" class="erp_btn erp_btn_secondary erp_btn_icon" type="button" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div id="detailContent" class="detail_content"></div>
+    </div>
+  </div>
+
+  <div id="vendorLookupDialog" class="modal_overlay" aria-hidden="true">
+    <div class="lookup_dialog" role="dialog" aria-modal="true" aria-labelledby="vendorLookupTitle">
+      <div class="section_head">
+        <div>
+          <h3 id="vendorLookupTitle">거래처 검색</h3>
+          <span>상호명, 대표자, 연락처, 사업자번호로 검색합니다.</span>
+        </div>
+        <button id="vendorLookupClose" class="erp_btn erp_btn_secondary erp_btn_icon" type="button" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="lookup_search_bar">
+        <input id="vendorLookupKeyword" class="erp_input" type="search" placeholder="상호명을 입력하세요">
+        <button id="vendorLookupSearchButton" class="erp_btn erp_btn_primary" type="button">
+          <i data-lucide="search"></i>
+          검색
+        </button>
+      </div>
+      <div class="lookup_result_head" data-result-head="vendorLookupResults">
+        <span>검색 결과</span>
+        <button class="erp_btn erp_btn_secondary" type="button" data-hide-lookup-results="vendorLookupResults">
+          <i data-lucide="chevron-up"></i>
+          결과 닫기
+        </button>
+      </div>
+      <div id="vendorLookupResults" class="lookup_results"></div>
+      <div class="lookup_footer">
+        <a id="vendorRegisterLink" class="erp_btn erp_btn_secondary" href="../../inventory/vendors-register.html">
+          <i data-lucide="plus"></i>
+          거래처 등록
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="itemLookupDialog" class="modal_overlay" aria-hidden="true">
+    <div class="lookup_dialog" role="dialog" aria-modal="true" aria-labelledby="itemLookupTitle">
+      <div class="section_head">
+        <div>
+          <h3 id="itemLookupTitle">품목 검색</h3>
+          <span>품목명으로 items 테이블을 검색합니다.</span>
+        </div>
+        <button id="itemLookupClose" class="erp_btn erp_btn_secondary erp_btn_icon" type="button" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="lookup_search_bar">
+        <input id="itemLookupKeyword" class="erp_input" type="search" placeholder="품목명을 입력하세요">
+        <button id="itemLookupSearchButton" class="erp_btn erp_btn_primary" type="button">
+          <i data-lucide="search"></i>
+          검색
+        </button>
+      </div>
+      <div class="lookup_result_head" data-result-head="itemLookupResults">
+        <span>검색 결과</span>
+        <button class="erp_btn erp_btn_secondary" type="button" data-hide-lookup-results="itemLookupResults">
+          <i data-lucide="chevron-up"></i>
+          결과 닫기
+        </button>
+      </div>
+      <div id="itemLookupResults" class="lookup_results"></div>
+    </div>
+  </div>
+
+  <div id="purchaseOrderLookupDialog" class="modal_overlay" aria-hidden="true">
+    <div class="lookup_dialog" role="dialog" aria-modal="true" aria-labelledby="purchaseOrderLookupTitle">
+      <div class="section_head">
+        <div>
+          <h3 id="purchaseOrderLookupTitle">발주서 불러오기</h3>
+          <span>발주번호 또는 거래처명으로 검색해 품목 라인을 가져옵니다.</span>
+        </div>
+        <button id="purchaseOrderLookupClose" class="erp_btn erp_btn_secondary erp_btn_icon" type="button" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="lookup_search_bar">
+        <input id="purchaseOrderLookupKeyword" class="erp_input" type="search" placeholder="발주번호 또는 거래처명">
+        <button id="purchaseOrderLookupSearchButton" class="erp_btn erp_btn_primary" type="button">
+          <i data-lucide="search"></i>
+          검색
+        </button>
+      </div>
+      <div class="lookup_result_head" data-result-head="purchaseOrderLookupResults">
+        <span>검색 결과</span>
+        <button class="erp_btn erp_btn_secondary" type="button" data-hide-lookup-results="purchaseOrderLookupResults">
+          <i data-lucide="chevron-up"></i>
+          결과 닫기
+        </button>
+      </div>
+      <div id="purchaseOrderLookupResults" class="lookup_results"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/tax_invoice.js"></script>
+</body>
+</html>

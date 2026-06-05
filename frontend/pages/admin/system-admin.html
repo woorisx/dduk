@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 시스템 운영 관리</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../styles/admin/admin-pages.css">
+</head>
+
+<body class="w-full bg-gray-50/50">
+  <aside data-dduk-sidebar></aside>
+
+  <div class="main_wrap">
+    <header class="topbar border-b border-gray-100 bg-white">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="flex-1 px-4">
+        <h2 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">System Management</h2>
+      </div>
+    </header>
+
+    <main class="content_area p-6 space-y-8">
+      <div class="flex items-end justify-between border-b border-gray-100 pb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 tracking-tight">시스템 운영 관리</h2>
+          <p class="text-gray-500 text-sm mt-1">ERP 인프라와 AI/RPA 실행 상태를 한 화면에서 확인한다.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between group">
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">AI 호출 건수 (24h)</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2 tracking-tight" id="dashboardAiRequestCount">-</p>
+            <span class="text-[11px] text-green-500 font-medium flex items-center gap-1 mt-2">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> 최근 집계 기준
+            </span>
+          </div>
+          <div class="p-3.5 bg-blue-50 rounded-2xl text-blue-600 group-hover:scale-105 transition-transform duration-300">
+            <i data-lucide="bot" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between group">
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">RPA 성공률</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2 tracking-tight" id="dashboardRpaSuccessRate">-</p>
+            <span class="text-[11px] text-green-500 font-medium flex items-center gap-1 mt-2">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 완료 이력 기준
+            </span>
+          </div>
+          <div class="p-3.5 bg-emerald-50 rounded-2xl text-emerald-600 group-hover:scale-105 transition-transform duration-300">
+            <i data-lucide="activity" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between group">
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">활성 대화 세션</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2 tracking-tight" id="dashboardActiveChatSessions">-</p>
+            <span class="text-[11px] text-indigo-500 font-medium flex items-center gap-1 mt-2">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i> 실시간 대화 기준
+            </span>
+          </div>
+          <div class="p-3.5 bg-indigo-50 rounded-2xl text-indigo-600 group-hover:scale-105 transition-transform duration-300">
+            <i data-lucide="message-square" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between group">
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">RPA 대기 큐</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2 tracking-tight" id="dashboardRpaQueueCount">-</p>
+            <span class="text-[11px] text-gray-400 font-medium flex items-center gap-1 mt-2">
+              <i data-lucide="clock" class="w-3.5 h-3.5"></i> 요청/실행 상태 기준
+            </span>
+          </div>
+          <div class="p-3.5 bg-amber-50 rounded-2xl text-amber-600 group-hover:scale-105 transition-transform duration-300">
+            <i data-lucide="cpu" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-6">
+            <div class="p-1.5 bg-blue-50 rounded-lg text-blue-600">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">관리자 계정 요약</h3>
+          </div>
+          <div class="space-y-4">
+            <div class="rounded-xl bg-gray-50/70 hover:bg-gray-50 border border-gray-100/50 px-5 py-4 transition-colors duration-200 flex justify-between items-center">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400">전체 관리자 계정</p>
+                <p id="dashboardTotalMemberCount" class="mt-1 text-2xl font-bold text-gray-900 tracking-tight">-</p>
+              </div>
+              <i data-lucide="user" class="text-gray-300 w-8 h-8"></i>
+            </div>
+            <div class="rounded-xl bg-gray-50/70 hover:bg-gray-50 border border-gray-100/50 px-5 py-4 transition-colors duration-200 flex justify-between items-center">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400">활성 관리자 계정</p>
+                <p id="dashboardActiveMemberCount" class="mt-1 text-2xl font-bold text-gray-900 tracking-tight">-</p>
+              </div>
+              <i data-lucide="user-check" class="text-emerald-300 w-8 h-8"></i>
+            </div>
+            <div class="rounded-xl bg-gray-50/70 hover:bg-gray-50 border border-gray-100/50 px-5 py-4 transition-colors duration-200 flex justify-between items-center">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400">최근 로그인 계정</p>
+                <p id="dashboardRecentLoginCount" class="mt-1 text-2xl font-bold text-gray-900 tracking-tight">-</p>
+                <p id="dashboardRecentLoginHint" class="mt-1.5 text-[11px] text-gray-400 font-medium">-</p>
+              </div>
+              <i data-lucide="log-in" class="text-indigo-300 w-8 h-8"></i>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-6">
+            <div class="p-1.5 bg-purple-50 rounded-lg text-purple-600">
+              <i data-lucide="sliders" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">AI/RPA 인프라 현황</h3>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between rounded-xl border border-gray-100 px-5 py-4 hover:border-gray-200 transition-colors duration-200 bg-white">
+              <div>
+                <p class="text-sm font-bold text-gray-800">AI 엔진 상태</p>
+                <p class="mt-0.5 text-xs text-gray-400">Gemini 연동 모델 / 연결 상태</p>
+              </div>
+              <span id="dashboardAiEngineStatus" class="text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200/60 rounded-lg px-2.5 py-1">-</span>
+            </div>
+            <div class="flex items-center justify-between rounded-xl border border-gray-100 px-5 py-4 hover:border-gray-200 transition-colors duration-200 bg-white">
+              <div>
+                <p class="text-sm font-bold text-gray-800">RPA 노드 상태</p>
+                <p class="mt-0.5 text-xs text-gray-400">RPA Runner 기동 상태</p>
+              </div>
+              <span id="dashboardRpaNodeStatus" class="text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200/60 rounded-lg px-2.5 py-1">-</span>
+            </div>
+            <div class="flex items-center justify-between rounded-xl border border-gray-100 px-5 py-4 hover:border-gray-200 transition-colors duration-200 bg-white">
+              <div>
+                <p class="text-sm font-bold text-gray-800">최근 장애/오류 감지</p>
+                <p class="mt-0.5 text-xs text-gray-400">최근 1시간 내 AI/RPA 오류</p>
+              </div>
+              <span id="dashboardRecentErrorCount" class="text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200/60 rounded-lg px-2.5 py-1">-</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+
+
+      <section class="rounded-2xl border border-rose-200/60 bg-rose-50/60 p-6 shadow-sm">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h3 class="text-xl font-black text-slate-900">규칙 기반 이상 탐지 경고 목록</h3>
+            <p class="mt-2 text-sm font-medium text-slate-600">재고 음수, 긴급 발주, 공급처 누락 같은 설명 가능한 경고를 관리자 화면에서 바로 검토할 수 있어.</p>
+          </div>
+          <button id="btnToggleAnomalyAccordion" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white hover:bg-slate-700 transition-colors duration-200">
+            경고 목록 열기
+          </button>
+        </div>
+
+        <!-- 아코디언 콘텐츠 영역 -->
+        <div id="anomalyAccordionContent" class="hidden mt-6 space-y-6 p-6 bg-white rounded-2xl border border-rose-200/60 shadow-sm">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <h4 class="text-lg font-bold text-slate-800">이상 탐지 모니터링 및 실시간 제어</h4>
+            <div class="flex flex-wrap gap-2">
+              <button id="refreshSummaryBtn" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors duration-200">요약 새로고침</button>
+              <button id="runDetectionBtn" type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white hover:bg-slate-700 transition-colors duration-200">탐지 다시 실행</button>
+            </div>
+          </div>
+
+          <div id="anomalyMessage" class="hidden rounded-2xl border px-4 py-3 text-sm font-semibold"></div>
+
+          <!-- 통계 카드 요약 -->
+          <div class="grid gap-4 grid-cols-2 lg:grid-cols-5">
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-400">활성 경고</p>
+              <p id="summaryActiveCount" class="mt-2 text-3xl font-black text-slate-900">-</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-amber-500">OPEN</p>
+              <p id="summaryOpenCount" class="mt-2 text-3xl font-black text-amber-600">-</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-emerald-500">CONFIRMED</p>
+              <p id="summaryConfirmedCount" class="mt-2 text-3xl font-black text-emerald-600">-</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-rose-500">CRITICAL</p>
+              <p id="summaryCriticalCount" class="mt-2 text-3xl font-black text-rose-600">-</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">HIGH</p>
+              <p id="summaryHighCount" class="mt-2 text-3xl font-black text-indigo-600">-</p>
+            </article>
+          </div>
+
+          <!-- 필터 폼 -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <form id="anomalyFilterForm" class="grid gap-3 lg:grid-cols-5">
+              <select id="filterStatus" class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">
+                <option value="">전체 상태</option>
+                <option value="OPEN">OPEN</option>
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="FALSE_POSITIVE">FALSE_POSITIVE</option>
+                <option value="IGNORED">IGNORED</option>
+              </select>
+              <select id="filterActive" class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">
+                <option value="">전체 활성 여부</option>
+                <option value="true">활성만</option>
+                <option value="false">비활성만</option>
+              </select>
+              <select id="filterSeverity" class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">
+                <option value="">전체 심각도</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+              </select>
+              <input id="filterKeyword" type="text" placeholder="품목명, 창고명, 제목 검색" class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 placeholder:text-slate-400">
+              <div class="flex gap-2">
+                <button type="submit" class="flex-1 rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white hover:bg-slate-700 transition-colors duration-200">조회</button>
+                <button id="resetFiltersBtn" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors duration-200">초기화</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 테이블 목록 -->
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[1000px] text-left text-sm">
+                <thead class="bg-slate-50 text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+                  <tr>
+                    <th class="px-5 py-4">심각도</th>
+                    <th class="px-5 py-4">규칙</th>
+                    <th class="px-5 py-4">대상</th>
+                    <th class="px-5 py-4">요약</th>
+                    <th class="px-5 py-4">상태</th>
+                    <th class="px-5 py-4">최근 감지</th>
+                    <th class="px-5 py-4 text-right">조치</th>
+                  </tr>
+                </thead>
+                <tbody id="anomalyTableBody" class="divide-y divide-slate-100">
+                  <tr>
+                    <td colspan="7" class="px-5 py-10 text-center text-slate-400">이상 탐지 목록을 불러오는 중이야.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 페이징 -->
+            <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50/70 px-5 py-4">
+              <p id="anomalyPageInfo" class="text-sm font-medium text-slate-500">페이지 1 / 1</p>
+              <div class="flex gap-2">
+                <button id="prevPageBtn" type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors duration-200">이전</button>
+                <button id="nextPageBtn" type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors duration-200">다음</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between mb-6 pb-5 border-b border-gray-100">
+          <div class="flex items-center gap-2">
+            <div class="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
+              <i data-lucide="history" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">관리자 감사 로그</h3>
+          </div>
+          <form id="auditFilterForm" class="flex flex-wrap items-center gap-2.5">
+            <input type="text" id="auditTargetFilter" placeholder="대상 계정" class="px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200 placeholder-gray-400 w-36">
+            <input type="text" id="auditActorFilter" placeholder="작업자" class="px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200 placeholder-gray-400 w-36">
+            <select id="auditActionFilter" class="px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200 bg-white text-gray-700 cursor-pointer">
+              <option value="">전체 액션</option>
+              <option value="CREATE_MEMBER">계정 생성</option>
+              <option value="UPDATE_MEMBER_ROLE">권한 변경</option>
+              <option value="UPDATE_MEMBER_STATUS">상태 변경</option>
+              <option value="DELETE_MEMBER">계정 삭제</option>
+            </select>
+            <div class="flex items-center gap-1.5 text-gray-400 text-xs font-semibold">
+              <input type="date" id="auditDateFrom" class="px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200">
+              <span>~</span>
+              <input type="date" id="auditDateTo" class="px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200">
+            </div>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all duration-200 shadow-sm">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>조회
+            </button>
+            <button type="button" id="auditFilterResetButton" class="px-5 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold text-gray-500 flex items-center gap-1.5 transition-all duration-200">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>초기화
+            </button>
+          </form>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-gray-100">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="bg-gray-50/70 border-b border-gray-100 text-gray-400 text-[10px] tracking-wider font-bold uppercase">
+              <tr>
+                <th class="px-5 py-3.5 font-bold">발생 시각</th>
+                <th class="px-5 py-3.5 font-bold">액션</th>
+                <th class="px-5 py-3.5 font-bold">작업자</th>
+                <th class="px-5 py-3.5 font-bold">대상</th>
+                <th class="px-5 py-3.5 font-bold">상세</th>
+                <th class="px-5 py-3.5 font-bold">IP</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody" class="divide-y divide-gray-100 text-gray-600 text-xs">
+              <tr>
+                <td colspan="6" class="px-5 py-12 text-center text-gray-400 font-medium">감사 로그를 불러오는 중...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p id="auditPaginationInfo" class="text-xs text-gray-400 font-medium">-</p>
+          <div class="flex items-center gap-2">
+            <button type="button" id="auditPrevButton" class="px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 disabled:opacity-40 text-xs font-bold text-gray-600 transition-all duration-200">이전</button>
+            <button type="button" id="auditNextButton" class="px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 disabled:opacity-40 text-xs font-bold text-gray-600 transition-all duration-200">다음</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../services/common/session.js"></script>
+  <script src="../../services/common/app-shell.js"></script>
+  <script src="../../services/common/sidebar.js"></script>
+  <script src="../../services/admin/anomaly-detection.js"></script>
+  <script src="../../services/admin/dashboard-management.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+      window.ddukAppShell.hydratePage({
+        title: '시스템 운영 관리',
+        description: 'ERP 인프라와 전역 환경 설정을 모니터링한다.'
+      });
+    });
+  </script>
+</body>
+
+</html>

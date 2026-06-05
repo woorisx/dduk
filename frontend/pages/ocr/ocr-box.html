@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - OCR 문서함</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles/common/dashboard.css?v=1.0.1">
+  <link rel="stylesheet" href="../../styles/admin/admin-pages.css?v=1.0.1">
+</head>
+
+<body class="w-full">
+  <aside data-dduk-sidebar></aside>
+
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="flex-1 px-4">
+        <h2 class="text-lg font-semibold text-gray-800">OCR 문서함</h2>
+      </div>
+    </header>
+
+    <main class="content_area space-y-6 p-6">
+      <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-6 flex flex-col border-b border-slate-100 pb-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">OCR 문서함</h1>
+            <p class="mt-1.5 text-sm text-slate-500">증빙 문서 OCR 결과와 검토 상태, 연결 상태를 한 화면에서 확인하고 관리해.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div class="relative w-full xl:max-w-xs">
+            <i data-lucide="search" class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+            <input id="ocrKeyword" type="search" placeholder="파일명 또는 거래처 검색" class="w-full rounded-2xl border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+          </div>
+
+          <div class="grid flex-1 grid-cols-2 gap-3 sm:flex sm:items-center sm:flex-wrap xl:justify-end">
+            <div class="dduk-custom-select-container relative inline-block min-w-[110px] text-left">
+              <select id="ocrTypeFilter" class="hidden">
+                <option value="">전체 유형</option>
+                <option value="RECEIPT">영수증</option>
+                <option value="INVOICE">세금계산서</option>
+                <option value="PURCHASE_ORDER">발주서</option>
+                <option value="STATEMENT">거래명세서</option>
+              </select>
+              <button type="button" class="dduk-custom-select-btn flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                <span class="dduk-selected-label">전체 유형</span>
+                <i data-lucide="chevron-down" class="dduk-select-chevron h-4 w-4 text-slate-400 transition-transform duration-300"></i>
+              </button>
+              <div class="dduk-custom-select-options absolute left-0 right-0 z-50 mt-2 hidden space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-200/80 animate-fade-in">
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value=""><span>전체 유형</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="RECEIPT"><span>영수증</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="INVOICE"><span>세금계산서</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="PURCHASE_ORDER"><span>발주서</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="STATEMENT"><span>거래명세서</span></button>
+              </div>
+            </div>
+
+            <div class="dduk-custom-select-container relative inline-block min-w-[140px] text-left">
+              <select id="ocrStatusFilter" class="hidden">
+                <option value="">전체 처리 상태</option>
+                <option value="UPLOADED">업로드됨</option>
+                <option value="PROCESSING">분석 중</option>
+                <option value="PARSED">분석 완료</option>
+                <option value="FAILED">분석 실패</option>
+              </select>
+              <button type="button" class="dduk-custom-select-btn flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                <span class="dduk-selected-label">전체 처리 상태</span>
+                <i data-lucide="chevron-down" class="dduk-select-chevron h-4 w-4 text-slate-400 transition-transform duration-300"></i>
+              </button>
+              <div class="dduk-custom-select-options absolute left-0 right-0 z-50 mt-2 hidden space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-200/80 animate-fade-in">
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value=""><span>전체 처리 상태</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="UPLOADED"><span>업로드됨</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="PROCESSING"><span>분석 중</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="PARSED"><span>분석 완료</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="FAILED"><span>분석 실패</span></button>
+              </div>
+            </div>
+
+            <div class="dduk-custom-select-container relative inline-block min-w-[140px] text-left">
+              <select id="ocrReviewFilter" class="hidden">
+                <option value="">전체 검토 상태</option>
+                <option value="PENDING">검토 대기</option>
+                <option value="APPROVED">승인 완료</option>
+                <option value="REJECTED">반려</option>
+              </select>
+              <button type="button" class="dduk-custom-select-btn flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                <span class="dduk-selected-label">전체 검토 상태</span>
+                <i data-lucide="chevron-down" class="dduk-select-chevron h-4 w-4 text-slate-400 transition-transform duration-300"></i>
+              </button>
+              <div class="dduk-custom-select-options absolute left-0 right-0 z-50 mt-2 hidden space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-200/80 animate-fade-in">
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value=""><span>전체 검토 상태</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="PENDING"><span>검토 대기</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="APPROVED"><span>승인 완료</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="REJECTED"><span>반려</span></button>
+              </div>
+            </div>
+
+            <div class="dduk-custom-select-container relative inline-block min-w-[140px] text-left">
+              <select id="ocrLinkFilter" class="hidden">
+                <option value="">전체 연결 상태</option>
+                <option value="UNLINKED">연결 대기</option>
+                <option value="LINKED">연결 완료</option>
+                <option value="UNLINKED_BY_DELETE">연결 해제됨</option>
+              </select>
+              <button type="button" class="dduk-custom-select-btn flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                <span class="dduk-selected-label">전체 연결 상태</span>
+                <i data-lucide="chevron-down" class="dduk-select-chevron h-4 w-4 text-slate-400 transition-transform duration-300"></i>
+              </button>
+              <div class="dduk-custom-select-options absolute left-0 right-0 z-50 mt-2 hidden space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-200/80 animate-fade-in">
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value=""><span>전체 연결 상태</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="UNLINKED"><span>연결 대기</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="LINKED"><span>연결 완료</span></button>
+                <button type="button" class="dduk-custom-option-btn flex w-full items-center justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600" data-value="UNLINKED_BY_DELETE"><span>연결 해제됨</span></button>
+              </div>
+            </div>
+
+            <button id="refreshOcrDocumentsBtn" type="button" class="col-span-2 flex items-center justify-center gap-1.5 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:col-span-1">
+              <i data-lucide="rotate-cw" class="h-4 w-4"></i>
+              <span>새로고침</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="ocrBoxMessage" class="hidden"></div>
+
+        <div class="mt-6 overflow-hidden rounded-3xl border border-slate-100">
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white text-center text-sm">
+              <thead class="bg-slate-50 text-center text-slate-500">
+                <tr>
+                  <th class="px-6 py-4 font-semibold text-center">ID</th>
+                  <th class="px-6 py-4 font-semibold text-center">파일명</th>
+                  <th class="px-6 py-4 font-semibold text-center">유형</th>
+                  <th class="px-6 py-4 font-semibold text-center">처리 상태</th>
+                  <th class="px-6 py-4 font-semibold text-center">검토</th>
+                  <th class="px-6 py-4 font-semibold text-center">연결</th>
+                  <th class="px-6 py-4 font-semibold text-center">거래처</th>
+                  <th class="px-6 py-4 font-semibold text-center">금액</th>
+                  <th class="px-6 py-4 font-semibold text-center">상세</th>
+                </tr>
+              </thead>
+              <tbody id="ocrTableBody">
+                <tr>
+                  <td colspan="9" class="px-6 py-10 text-center text-slate-400">OCR 문서를 불러오는 중이야.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <article class="min-w-0 space-y-6">
+          <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="text-lg font-bold text-slate-900">문서 상세 정보</h2>
+              <div class="flex items-center gap-2">
+                <button id="unlinkOcrBtn" type="button" disabled class="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                  연결 해제
+                </button>
+                <button id="retryOcrBtn" type="button" class="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100">
+                  재처리 요청
+                </button>
+                <button id="deleteOcrBtn" type="button" disabled class="rounded-2xl border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                  삭제
+                </button>
+              </div>
+            </div>
+            <div id="ocrDetailSummary" class="mt-4 rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">
+              문서를 선택하면 상세 정보가 여기에 표시돼.
+            </div>
+          </section>
+
+          <div class="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-1.5">
+            <button type="button" class="ocr-tab-btn active flex min-w-[120px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-100 bg-white py-3 text-sm font-bold text-indigo-600 shadow-sm" data-target="panel-review">
+              <i data-lucide="check-square" class="h-4 w-4"></i>
+              <span>검토 및 보정</span>
+            </button>
+            <button type="button" class="ocr-tab-btn flex min-w-[120px] flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-slate-500 transition-all duration-300 hover:text-slate-800" data-target="panel-purchase">
+              <i data-lucide="package" class="h-4 w-4"></i>
+              <span>발주 연결</span>
+            </button>
+            <button type="button" class="ocr-tab-btn flex min-w-[120px] flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-slate-500 transition-all duration-300 hover:text-slate-800" data-target="panel-expense">
+              <i data-lucide="coins" class="h-4 w-4"></i>
+              <span>비용 연결</span>
+            </button>
+            <button type="button" class="ocr-tab-btn flex min-w-[120px] flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-slate-500 transition-all duration-300 hover:text-slate-800" data-target="panel-voucher">
+              <i data-lucide="file-text" class="h-4 w-4"></i>
+              <span>전표 연결</span>
+            </button>
+          </div>
+
+          <div class="ocr-tab-panels">
+            <div id="panel-review" class="ocr-tab-panel space-y-6">
+              <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex items-center justify-between gap-3">
+                  <h2 class="text-lg font-bold text-slate-900">분석 데이터 검토</h2>
+                  <span id="ocrReviewStatusBadge" class="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">PENDING</span>
+                </div>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">거래처명</span>
+                    <input id="reviewVendorName" type="text" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="거래처명">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">거래 일자</span>
+                    <input id="reviewTransactionDate" type="date" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">총 금액</span>
+                    <input id="reviewTotalAmount" type="number" min="0" step="0.01" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="0">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">통화</span>
+                    <input id="reviewCurrency" type="text" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm uppercase outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="KRW" maxlength="10">
+                  </label>
+                </div>
+                <label class="mt-4 block">
+                  <span class="mb-2 block text-sm font-semibold text-slate-700">검토 메모</span>
+                  <textarea id="reviewNotes" class="min-h-[100px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="검토 메모를 입력해 줘"></textarea>
+                </label>
+                <div class="mt-4 block">
+                  <div class="mb-2 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-slate-700">추출 데이터 검토 요약</span>
+                  </div>
+                  <div id="ocrExcelTableContainer" class="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/20 p-2 shadow-inner"></div>
+                  <textarea id="ocrReviewedResultInput" class="hidden"></textarea>
+                </div>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button id="approveOcrBtn" type="button" class="flex items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-100">
+                    <i data-lucide="check" class="h-4 w-4"></i>
+                    <span>승인</span>
+                  </button>
+                  <button id="rejectOcrBtn" type="button" class="flex items-center justify-center gap-1.5 rounded-2xl bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-500 hover:shadow-lg hover:shadow-rose-100">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                    <span>반려</span>
+                  </button>
+                </div>
+                <p class="mt-3 text-xs text-slate-400">PARSED 문서만 검토할 수 있고, 이미 연결된 문서는 검토 상태를 바꿀 수 없어.</p>
+              </section>
+
+              <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <button type="button" id="toggleRawResultBtn" class="flex w-full items-center justify-between text-sm font-semibold text-slate-700 outline-none">
+                  <span>OCR 원본 결과 확인</span>
+                  <i data-lucide="chevron-down" id="rawResultChevron" class="h-4 w-4 text-slate-400 transition-transform duration-300"></i>
+                </button>
+                <div id="ocrRawResultWrapper" class="mt-3 hidden">
+                  <pre id="ocrRawResult" class="max-h-[300px] w-full max-w-full overflow-auto whitespace-pre-wrap break-all rounded-2xl bg-slate-950 p-4 text-xs text-slate-200">아직 선택한 문서가 없어.</pre>
+                </div>
+              </section>
+            </div>
+
+            <div id="panel-purchase" class="ocr-tab-panel hidden space-y-6">
+              <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900">구매 발주 연결</h2>
+                <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div class="flex flex-col gap-3 sm:flex-row">
+                    <input id="vendorSearchKeyword" type="search" class="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="거래처명, 대표자, 연락처 검색">
+                    <button id="searchVendorBtn" type="button" class="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                      거래처 찾기
+                    </button>
+                  </div>
+                  <div id="vendorSearchResults" class="mt-3 space-y-2 text-sm text-slate-600"></div>
+                </div>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">거래처 ID</span>
+                    <input id="purchaseVendorId" type="number" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="예: 3">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">납기일</span>
+                    <input id="purchaseExpectedDate" type="date" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                </div>
+                <label class="mt-4 block">
+                  <span class="mb-2 block text-sm font-semibold text-slate-700">발주 메모</span>
+                  <input id="purchaseNote" type="text" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="OCR 문서를 바탕으로 생성한 발주 메모">
+                </label>
+                <div class="mt-4 block">
+                  <span class="mb-2 block text-sm font-semibold text-slate-700">발주 항목 목록</span>
+                  <div id="purchaseItemsTableContainer" class="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/20 p-2 shadow-inner"></div>
+                  <textarea id="purchaseItemsJson" class="hidden"></textarea>
+                </div>
+                <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div class="flex flex-col gap-3 sm:flex-row">
+                    <input id="itemSearchKeyword" type="search" class="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="품목명 검색">
+                    <button id="searchItemBtn" type="button" class="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                      품목 찾기
+                    </button>
+                  </div>
+                  <div id="itemSearchResults" class="mt-3 space-y-2 text-sm text-slate-600"></div>
+                </div>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button id="linkPurchaseOrderBtn" type="button" class="flex items-center justify-center gap-1.5 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-100">
+                    <i data-lucide="link" class="h-4 w-4"></i>
+                    <span>구매 발주 생성 및 연결</span>
+                  </button>
+                </div>
+              </section>
+            </div>
+
+            <div id="panel-expense" class="ocr-tab-panel hidden space-y-6">
+              <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900">비용 연결</h2>
+                <div class="grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">직원 ID</span>
+                    <input id="expenseEmployeeId" type="number" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="선택값 입력">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">비용 일자</span>
+                    <input id="expenseDate" type="date" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">카테고리</span>
+                    <input id="expenseCategory" type="text" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="예: 소모품비">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">금액</span>
+                    <input id="expenseAmount" type="number" min="0" step="0.01" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="예: 18500">
+                  </label>
+                </div>
+                <label class="mt-4 block">
+                  <span class="mb-2 block text-sm font-semibold text-slate-700">설명</span>
+                  <textarea id="expenseDescription" class="min-h-[120px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="OCR 증빙 기반 비용 설명"></textarea>
+                </label>
+                <label class="mt-4 block md:max-w-xs">
+                  <span class="mb-2 block text-sm font-semibold text-slate-700">상태</span>
+                  <select id="expenseStatus" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                    <option value="PENDING">PENDING</option>
+                    <option value="APPROVED">APPROVED</option>
+                    <option value="REJECTED">REJECTED</option>
+                  </select>
+                </label>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button id="linkExpenseBtn" type="button" class="flex items-center justify-center gap-1.5 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-100">
+                    <i data-lucide="link" class="h-4 w-4"></i>
+                    <span>비용 생성 및 연결</span>
+                  </button>
+                </div>
+              </section>
+            </div>
+
+            <div id="panel-voucher" class="ocr-tab-panel hidden space-y-6">
+              <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900">전표 연결</h2>
+                <div class="grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">전표 일자</span>
+                    <input id="voucherDate" type="date" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">전표 유형</span>
+                    <select id="voucherType" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                      <option value="PURCHASE">PURCHASE</option>
+                      <option value="SALES">SALES</option>
+                    </select>
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">부가세 유형</span>
+                    <select id="voucherVatType" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                      <option value="TAX_INVOICE">TAX_INVOICE</option>
+                      <option value="ZERO_TAX">ZERO_TAX</option>
+                      <option value="INVOICE">INVOICE</option>
+                      <option value="RETAIL_SALES">RETAIL_SALES</option>
+                      <option value="EXPORT">EXPORT</option>
+                      <option value="CARD_SALES">CARD_SALES</option>
+                      <option value="CASH_RECEIPT">CASH_RECEIPT</option>
+                      <option value="TAX_FREE">TAX_FREE</option>
+                      <option value="PURCHASER_ISSUED_TAX_INVOICE">PURCHASER_ISSUED_TAX_INVOICE</option>
+                      <option value="OTHER_SALES">OTHER_SALES</option>
+                    </select>
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">거래처 ID</span>
+                    <input id="voucherVendorId" type="number" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="선택값 입력">
+                  </label>
+                  <label class="block md:col-span-2">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">거래처명 스냅샷</span>
+                    <input id="voucherVendorName" type="text" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="OCR 거래처명을 기본값으로 사용">
+                  </label>
+                </div>
+                <label class="mt-4 block">
+                  <span class="mb-2 block text-sm font-semibold text-slate-700">전표 설명</span>
+                  <textarea id="voucherDescription" class="min-h-[100px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="OCR 증빙 기반 전표 설명"></textarea>
+                </label>
+                <div class="mt-4 grid gap-4 md:grid-cols-3">
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">공급가액</span>
+                    <input id="voucherSupplyAmount" type="number" min="0" step="0.01" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">부가세</span>
+                    <input id="voucherVatAmount" type="number" min="0" step="0.01" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-semibold text-slate-700">수수료</span>
+                    <input id="voucherFeeAmount" type="number" min="0" step="0.01" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  </label>
+                </div>
+                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <label class="block">
+                      <span class="mb-2 block text-sm font-semibold text-slate-700">사업 계정 검색</span>
+                      <div class="flex flex-col gap-3 sm:flex-row">
+                        <input id="voucherBusinessAccountKeyword" type="search" class="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="비용/매출 계정 검색">
+                        <button id="searchBusinessAccountBtn" type="button" class="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                          사업 계정 찾기
+                        </button>
+                      </div>
+                    </label>
+                    <input id="voucherBusinessAccountId" type="number" class="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="사업 계정 ID">
+                    <div id="businessAccountResults" class="mt-3 space-y-2 text-sm text-slate-600"></div>
+                  </div>
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <label class="block">
+                      <span class="mb-2 block text-sm font-semibold text-slate-700">결제 계정 검색</span>
+                      <div class="flex flex-col gap-3 sm:flex-row">
+                        <input id="voucherSettlementAccountKeyword" type="search" class="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="예금/현금 계정 검색">
+                        <button id="searchSettlementAccountBtn" type="button" class="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                          결제 계정 찾기
+                        </button>
+                      </div>
+                    </label>
+                    <input id="voucherSettlementAccountId" type="number" class="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" placeholder="결제 계정 ID">
+                    <div id="settlementAccountResults" class="mt-3 space-y-2 text-sm text-slate-600"></div>
+                  </div>
+                </div>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button id="linkVoucherBtn" type="button" class="flex items-center justify-center gap-1.5 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-100">
+                    <i data-lucide="link" class="h-4 w-4"></i>
+                    <span>전표 생성 및 연결</span>
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </article>
+
+        <article class="min-w-0 space-y-6">
+          <section class="sticky top-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-900">원본 미리보기</h2>
+            <div class="mt-4 flex min-h-[500px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6">
+              <img id="ocrPreviewImage" alt="OCR 문서 미리보기" class="hidden h-auto max-h-[460px] w-auto max-w-full rounded-2xl object-contain shadow-md">
+
+              <div id="ocrPreviewFallback" class="hidden space-y-3 p-6 text-center">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-500">
+                  <i data-lucide="eye-off" class="h-6 w-6"></i>
+                </div>
+                <p class="text-sm font-semibold text-slate-600">미리보기를 불러올 수 없어</p>
+                <p class="text-xs text-slate-400">이미지 미리보기를 지원하지 않거나 파일을 불러오지 못했어.</p>
+              </div>
+
+              <div id="ocrPreviewHint" class="space-y-3 p-6 text-center">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-md animate-pulse">
+                  <i data-lucide="image" class="h-6 w-6 text-indigo-500"></i>
+                </div>
+                <p class="text-sm font-bold text-slate-700">증빙 이미지 대기 중</p>
+                <p class="text-xs leading-relaxed text-slate-400">목록에서 상세 보기 버튼을 누르면<br>원본 파일과 OCR 데이터가 여기에 매핑돼.</p>
+              </div>
+            </div>
+          </section>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../services/common/session.js?v=1.0.1"></script>
+  <script src="../../services/common/app-shell.js?v=1.0.1"></script>
+  <script src="../../services/common/sidebar.js?v=1.0.1"></script>
+  <script src="../../services/admin/ocr/ocr-documents-shared.js?v=1.0.2"></script>
+  <script src="../../services/admin/ocr/ocr-document-box-page.js?v=1.0.2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+      window.ddukAppShell.hydratePage({
+        title: "OCR 문서함",
+        description: "업로드한 증빙 문서의 OCR 결과와 검토 상태를 관리해."
+      });
+
+      const selectContainers = document.querySelectorAll(".dduk-custom-select-container");
+
+      selectContainers.forEach(container => {
+        const btn = container.querySelector(".dduk-custom-select-btn");
+        const optionsLayer = container.querySelector(".dduk-custom-select-options");
+        const chevron = container.querySelector(".dduk-select-chevron");
+        const labelSpan = container.querySelector(".dduk-selected-label");
+        const hiddenSelect = container.querySelector("select");
+
+        if (btn && optionsLayer && hiddenSelect) {
+          btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+
+            document.querySelectorAll(".dduk-custom-select-options").forEach(layer => {
+              if (layer !== optionsLayer) {
+                layer.classList.add("hidden");
+                const layerChevron = layer.parentElement.querySelector(".dduk-select-chevron");
+                if (layerChevron) layerChevron.classList.remove("rotate-180");
+              }
+            });
+
+            const isHidden = optionsLayer.classList.contains("hidden");
+            if (isHidden) {
+              optionsLayer.classList.remove("hidden");
+              if (chevron) chevron.classList.add("rotate-180");
+            } else {
+              optionsLayer.classList.add("hidden");
+              if (chevron) chevron.classList.remove("rotate-180");
+            }
+          });
+
+          const optionBtns = optionsLayer.querySelectorAll(".dduk-custom-option-btn");
+          optionBtns.forEach(optBtn => {
+            optBtn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              const val = optBtn.getAttribute("data-value");
+              const label = optBtn.querySelector("span").textContent;
+
+              hiddenSelect.value = val;
+              hiddenSelect.dispatchEvent(new Event("change"));
+
+              if (labelSpan) labelSpan.textContent = label;
+
+              optionsLayer.classList.add("hidden");
+              if (chevron) chevron.classList.remove("rotate-180");
+            });
+          });
+        }
+      });
+
+      document.addEventListener("click", function () {
+        document.querySelectorAll(".dduk-custom-select-options").forEach(layer => {
+          layer.classList.add("hidden");
+          const layerChevron = layer.parentElement.querySelector(".dduk-select-chevron");
+          if (layerChevron) layerChevron.classList.remove("rotate-180");
+        });
+      });
+
+      const tabButtons = document.querySelectorAll(".ocr-tab-btn");
+      const tabPanels = document.querySelectorAll(".ocr-tab-panel");
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetId = btn.dataset.target;
+
+          tabButtons.forEach(b => {
+            b.classList.remove("active", "bg-white", "shadow-sm", "border-slate-100", "text-indigo-600");
+            b.classList.add("text-slate-500");
+          });
+
+          btn.classList.add("active", "bg-white", "shadow-sm", "border-slate-100", "text-indigo-600");
+          btn.classList.remove("text-slate-500");
+
+          tabPanels.forEach(panel => {
+            panel.classList.add("hidden");
+          });
+
+          const targetPanel = document.getElementById(targetId);
+          if (targetPanel) {
+            targetPanel.classList.remove("hidden");
+          }
+        });
+      });
+
+      const toggleRawBtn = document.getElementById("toggleRawResultBtn");
+      const rawWrapper = document.getElementById("ocrRawResultWrapper");
+      const rawChevron = document.getElementById("rawResultChevron");
+
+      if (toggleRawBtn && rawWrapper) {
+        toggleRawBtn.addEventListener("click", function () {
+          const isHidden = rawWrapper.classList.contains("hidden");
+          if (isHidden) {
+            rawWrapper.classList.remove("hidden");
+            if (rawChevron) rawChevron.classList.add("rotate-180");
+          } else {
+            rawWrapper.classList.add("hidden");
+            if (rawChevron) rawChevron.classList.remove("rotate-180");
+          }
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

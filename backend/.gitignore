@@ -1,0 +1,60 @@
+# Java / Spring Boot
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+bin/
+out/
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Python / Flask
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Local environment files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+ERROR_LOG.md
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# RPA / Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Temp
+.tmp/
+.temp/
+.local-run/
+
+# AI Agent Internal
+STATE.md
+LOG.md
+OVERVIEW.md

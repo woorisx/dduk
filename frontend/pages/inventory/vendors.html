@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거래처 관리 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:#374151}
+        .form-input,.form-textarea{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:disabled,.form-textarea:disabled{background:#f9fafb;color:#6b7280;cursor:not-allowed}
+        .form-input:focus,.form-textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .form-textarea{min-height:96px;resize:vertical}
+        .data-table{width:100%;border-collapse:separate;border-spacing:0}
+        .data-table th{background:#f9fafb;padding:.75rem;text-align:left;font-size:.75rem;font-weight:700;color:#6b7280;border-bottom:1px solid #e5e7eb}
+        .data-table td{padding:.75rem;font-size:.875rem;color:#374151;border-bottom:1px solid #f3f4f6}
+        .data-table tr[data-id]{cursor:pointer}.data-table tr[data-id]:hover{background:#f9fafb}.data-table tr.selected{background:#eef2ff}
+        .vendor-pagination{display:flex;align-items:center;justify-content:center;gap:.375rem;padding:1rem;flex-wrap:wrap}
+        .vp-btn{min-width:2.25rem;height:2.25rem;display:inline-flex;align-items:center;justify-content:center;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;font-size:.8125rem;font-weight:700;color:#374151;cursor:pointer;transition:all .15s}
+        .vp-btn:hover:not(:disabled):not(.active){background:#f3f4f6}
+        .vp-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
+        .vp-btn:disabled{cursor:not-allowed;opacity:.4}
+        .vp-btn.nav{padding:0 .625rem;font-weight:800}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b sticky top-0 z-10">
+            <div class="flex items-center gap-4"><button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button><h1 class="text-xl font-bold text-gray-800">거래처 관리</h1></div>
+            <button type="button" onclick="location.href='vendors-register.html'" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> 거래처 등록</button>
+        </header>
+        <main class="content_area p-6">
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+                    <label><span class="form-label">통합 검색</span><input id="search-keyword" class="form-input" placeholder="거래처명, 대표자명, 전화번호, 사업자등록번호"></label>
+                    <div class="flex gap-2"><button id="btn-search" type="button" class="h-11 px-4 rounded-lg bg-gray-900 text-sm font-semibold text-white">조회</button><button id="btn-reset" type="button" class="h-11 px-4 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700">초기화</button></div>
+                </div>
+            </section>
+            <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_480px] gap-6">
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100"><h2 class="text-lg font-semibold text-gray-800">거래처 목록</h2><p id="list-status" class="text-sm text-gray-500 mt-1">검색 조건을 입력한 뒤 조회 버튼을 눌러주세요.</p></div>
+                    <div class="overflow-x-auto"><table class="data-table"><thead><tr><th>거래처 코드</th><th>거래처명</th><th>대표자명</th><th>사업자등록번호</th><th>담당자</th><th>전화번호</th><th>상태</th></tr></thead><tbody id="vendor-list"></tbody></table></div>
+                    <div id="vendor-pagination" class="vendor-pagination"></div>
+                </section>
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between gap-3"><div><h2 class="text-lg font-semibold text-gray-800">상세 정보</h2><p id="detail-status" class="text-sm text-gray-500 mt-1">목록에서 거래처를 선택하세요.</p></div><div class="flex gap-2"><button id="btn-edit" type="button" class="hidden px-3 py-2 text-sm font-semibold rounded-lg border bg-white">수정</button><button id="btn-cancel" type="button" class="hidden px-3 py-2 text-sm font-semibold rounded-lg border bg-white">취소</button><button id="btn-save" type="button" class="hidden px-3 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white">저장</button></div></div>
+                    <form id="detail-form" class="p-6 hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label><span class="form-label">거래처 코드</span><input id="vendorCode" class="form-input" disabled data-immutable></label>
+                        <label><span class="form-label">상태</span><input id="status" class="form-input" disabled></label>
+                        <label><span class="form-label">거래처명</span><input id="name" class="form-input" disabled data-immutable></label>
+                        <label><span class="form-label">대표자명</span><input id="representativeName" class="form-input" disabled data-immutable></label>
+                        <label><span class="form-label">사업자등록번호</span><input id="businessRegistrationNo" class="form-input" disabled data-immutable></label>
+                        <label><span class="form-label">업태</span><input id="businessType" class="form-input" disabled data-immutable></label>
+                        <label><span class="form-label">종목</span><input id="businessItem" class="form-input" disabled data-immutable></label>
+                        <label><span class="form-label">담당자명</span><input id="contactName" class="form-input" required></label>
+                        <label><span class="form-label">전화번호</span><input id="contactPhone" class="form-input" required></label>
+                        <label><span class="form-label">이메일</span><input id="email" type="email" class="form-input" required></label>
+                        <label class="md:col-span-2"><span class="form-label">주소</span><input id="address" class="form-input" required></label>
+                        <label><span class="form-label">은행명</span><input id="bankName" class="form-input" required></label>
+                        <label><span class="form-label">계좌번호</span><input id="bankAccountNo" class="form-input" required></label>
+                        <label><span class="form-label">예금주</span><input id="bankAccountHolder" class="form-input" required></label>
+                        <label class="md:col-span-2"><span class="form-label">비고</span><textarea id="memo" class="form-textarea"></textarea></label>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-vendors-page.js"></script>
+    
+
+</body>
+</html>

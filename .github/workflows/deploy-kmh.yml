@@ -1,0 +1,197 @@
+name: Deploy kmh to EC2
+
+on:
+  push:
+    branches:
+      - develop
+      - wooree
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-kmh
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dduk-backend:${{ github.ref_name }}
+  AI_SERVER_IMAGE: ghcr.io/${{ github.repository_owner }}/dduk-ai-server:${{ github.ref_name }}
+  RPA_SERVER_IMAGE: ghcr.io/${{ github.repository_owner }}/dduk-rpa-server:${{ github.ref_name }}
+
+jobs:
+  build-and-push:
+    name: Build and push deploy images
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}
+            ghcr.io/${{ github.repository_owner }}/dduk-backend:sha-${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push ai-server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ai-server
+          file: ./ai-server/Dockerfile
+          push: true
+          tags: |
+            ${{ env.AI_SERVER_IMAGE }}
+            ghcr.io/${{ github.repository_owner }}/dduk-ai-server:sha-${{ github.sha }}
+          cache-from: type=gha,scope=ai-server
+          cache-to: type=gha,mode=max,scope=ai-server
+
+      - name: Build and push rpa image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./rpa
+          file: ./rpa/Dockerfile
+          push: true
+          tags: |
+            ${{ env.RPA_SERVER_IMAGE }}
+            ghcr.io/${{ github.repository_owner }}/dduk-rpa-server:sha-${{ github.sha }}
+          cache-from: type=gha,scope=rpa
+          cache-to: type=gha,mode=max,scope=rpa
+
+  deploy:
+    name: Pull deploy images on EC2
+    runs-on: ubuntu-latest
+    environment: production
+    needs: build-and-push
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_PORT: ${{ secrets.EC2_PORT }}
+          EC2_DEPLOY_PATH: ${{ secrets.EC2_DEPLOY_PATH }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$EC2_HOST" || { echo "EC2_HOST secret is missing"; exit 1; }
+          test -n "$EC2_USER" || { echo "EC2_USER secret is missing"; exit 1; }
+          test -n "$EC2_DEPLOY_PATH" || { echo "EC2_DEPLOY_PATH secret is missing"; exit 1; }
+          test -n "$EC2_SSH_KEY" || { echo "EC2_SSH_KEY secret is missing"; exit 1; }
+          test -n "$GHCR_USERNAME" || { echo "GHCR_USERNAME secret is missing"; exit 1; }
+          test -n "$GHCR_READ_TOKEN" || { echo "GHCR_READ_TOKEN secret is missing"; exit 1; }
+          if [ -z "${EC2_PORT:-}" ]; then
+            echo "EC2_PORT is empty. The workflow will use port 22."
+          fi
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          CLEAN_HOST=$(echo "$EC2_HOST" | tr -d '\r' | xargs)
+          CLEAN_PORT=$(echo "${EC2_PORT:-22}" | tr -d '\r' | xargs)
+          [ -n "$CLEAN_PORT" ] || CLEAN_PORT=22
+          
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/dduk-erp-key.pem
+          chmod 600 ~/.ssh/dduk-erp-key.pem
+          ssh-keyscan -p "$CLEAN_PORT" -H "$CLEAN_HOST" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy pull-only stack on EC2
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_PORT: ${{ secrets.EC2_PORT }}
+          EC2_DEPLOY_PATH: ${{ secrets.EC2_DEPLOY_PATH }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
+          AI_SERVER_IMAGE: ${{ env.AI_SERVER_IMAGE }}
+          RPA_SERVER_IMAGE: ${{ env.RPA_SERVER_IMAGE }}
+        run: |
+          set -euo pipefail
+          CLEAN_HOST=$(echo "$EC2_HOST" | tr -d '\r' | xargs)
+          CLEAN_USER=$(echo "$EC2_USER" | tr -d '\r' | xargs)
+          CLEAN_PORT=$(echo "${EC2_PORT:-22}" | tr -d '\r' | xargs)
+          [ -n "$CLEAN_PORT" ] || CLEAN_PORT=22
+          CLEAN_DEPLOY_PATH=$(echo "$EC2_DEPLOY_PATH" | tr -d '\r' | xargs)
+          CLEAN_GHCR_USERNAME=$(echo "$GHCR_USERNAME" | tr -d '\r' | xargs)
+          
+          ssh -o IdentitiesOnly=yes -i ~/.ssh/dduk-erp-key.pem -p "$CLEAN_PORT" "$CLEAN_USER@$CLEAN_HOST" \
+            "export EC2_DEPLOY_PATH='$CLEAN_DEPLOY_PATH' GHCR_USERNAME='$CLEAN_GHCR_USERNAME' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' BACKEND_IMAGE='$BACKEND_IMAGE' AI_SERVER_IMAGE='$AI_SERVER_IMAGE' RPA_SERVER_IMAGE='$RPA_SERVER_IMAGE'; bash -s" <<'EOF'
+            set -euo pipefail
+            cd "$EC2_DEPLOY_PATH"
+
+            trap 'docker compose --env-file .env.aws -f docker-compose.deploy.yml logs --tail=100 backend ai-server rpa-server || true' ERR
+
+            git fetch origin
+            git checkout kmh
+            git pull --ff-only origin kmh
+
+            echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+
+            docker compose --env-file .env.aws -f docker-compose.deploy.yml config
+            docker compose --env-file .env.aws -f docker-compose.deploy.yml pull
+            docker compose --env-file .env.aws -f docker-compose.deploy.yml up -d --force-recreate
+            docker compose --env-file .env.aws -f docker-compose.deploy.yml ps
+
+            wait_for_http() {
+              local url="$1"
+              local label="$2"
+              local attempt=1
+
+              while [ "$attempt" -le 30 ]; do
+                if command -v curl >/dev/null 2>&1; then
+                  if curl -fsS "$url" >/dev/null; then
+                    echo "$label is ready"
+                    return 0
+                  fi
+                elif wget -qO- "$url" >/dev/null; then
+                  echo "$label is ready"
+                  return 0
+                fi
+
+                echo "Waiting for $label ($attempt/30): $url"
+                sleep 5
+                attempt=$((attempt + 1))
+              done
+
+              echo "$label did not become ready in time: $url" >&2
+              return 1
+            }
+
+            wait_for_http http://localhost:8080/index.html backend
+            wait_for_http http://localhost:5000/health ai-server
+            wait_for_http http://localhost:5050/health rpa-server
+          EOF

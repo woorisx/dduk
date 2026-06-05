@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>품목 등록 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:#374151}
+        .form-input,.form-select{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:focus,.form-select:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .form-input[readonly]{background:#f9fafb;color:#6b7280}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <main class="p-6">
+        <header class="mb-5 flex justify-between gap-4">
+            <div><h1 class="text-xl font-bold text-gray-900">품목 등록</h1><p class="mt-1 text-sm text-gray-500">등록 완료 시 발주요청 품목에 자동 추가됩니다.</p></div>
+            <button type="button" onclick="window.close()" class="p-2 rounded-lg border bg-white text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </header>
+        <form id="item-form" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <label><span class="form-label">품목 코드</span><input class="form-input" value="저장 시 자동 생성" readonly></label>
+                <label><span class="form-label">거래처</span><input id="vendor-name" class="form-input" readonly></label>
+                <label><span class="form-label">등록자 ID</span><input id="registered-by-id" class="form-input" readonly></label>
+                <label><span class="form-label">품목명</span><input name="name" id="name" class="form-input" required></label>
+                <label><span class="form-label">품목 유형</span><select name="itemType" class="form-select" required><option value="FINISHED_GOOD">완제품</option><option value="RAW_MATERIAL">원재료</option><option value="PACKAGING">포장재</option><option value="WORK_IN_PROGRESS">재공품</option><option value="SERVICE">서비스</option><option value="OTHER">기타</option></select></label>
+                <label><span class="form-label">카테고리</span><input name="category" class="form-input" required></label>
+                <label><span class="form-label">규격</span><input name="spec" class="form-input" required></label>
+                <label><span class="form-label">바코드</span><input name="barcode" class="form-input" placeholder="미입력 시 자동 생성"></label>
+                <label><span class="form-label">단위</span><input name="unit" class="form-input" placeholder="EA, BOX, KG" required></label>
+                <label><span class="form-label">표준원가</span><input name="standardCost" type="number" min="0" step="0.01" class="form-input" value="0" required></label>
+                <label><span class="form-label">단가</span><input name="unitPrice" type="number" min="0" step="0.01" class="form-input" value="0" required></label>
+                <label><span class="form-label">안전재고</span><input name="safetyStock" type="number" min="0" step="1" class="form-input" value="0" required></label>
+                <label><span class="form-label">사용 여부</span><select name="active" class="form-select" required><option value="true">사용</option><option value="false">미사용</option></select></label>
+            </div>
+            <div id="message" class="mt-5 min-h-6 text-sm font-semibold text-gray-500"></div>
+            <div class="mt-6 flex justify-end gap-2"><button type="button" onclick="window.close()" class="px-4 py-2 text-sm font-semibold rounded-lg border bg-white">취소</button><button id="btn-save" type="submit" class="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> 등록</button></div>
+        </form>
+    </main>
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/inventory/inventory-item-register-popup-page.js"></script>
+    
+
+</body>
+</html>

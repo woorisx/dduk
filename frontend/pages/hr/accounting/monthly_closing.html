@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 월 마감</title>
+  <meta name="description" content="회계기간 기준으로 전표, 분개, 원장, 급여 데이터를 검증하고 마감합니다.">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <link rel="stylesheet" href="../../../styles/accounting/monthly-closing.css">
+  <style>
+    .erp_table_container { position: relative; max-height: 600px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); }
+    .erp_table th { position: sticky; top: 0; background: #f1f5f9; z-index: 10; box-shadow: inset 0 -1px 0 var(--border); }
+    .table-loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 20; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-secondary); text-align: center; }
+    .kpi_card { background: var(--card-bg); border-radius: 12px; padding: 20px 24px; border: 1px solid var(--border); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+    .kpi_card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(79,70,229,0.08); border-color: var(--accent); }
+    .kpi_card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+    .kpi_card:hover::after { opacity: 1; }
+  </style>
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area">
+      <section class="page_header">
+        <div class="page_title_area">
+          <h2>월 마감</h2>
+          <p>회계기간 기준으로 전표, 분개, 원장, 급여 데이터를 검증하고 마감합니다.</p>
+        </div>
+        <div class="page_actions">
+          <input id="filterYear" type="number" min="2000" max="2100"
+            class="erp_input" style="width:90px;" aria-label="회계연도">
+          <button id="reloadButton" type="button" class="erp_btn erp_btn_icon" aria-label="새로고침">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+          <button id="createPeriodButton" type="button" class="erp_btn erp_btn_secondary">
+            <i data-lucide="calendar-plus"></i><span>회계기간 생성</span>
+          </button>
+          <button id="createYearButton" type="button" class="erp_btn erp_btn_secondary">
+            <i data-lucide="calendar-days"></i><span>연간 자동 생성</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 월마감 통합 대시보드 카드 -->
+      <section class="section_card mb-6 closing_kpi_dashboard">
+        <div class="closing_kpi_grid">
+          <!-- 마감 대상 월 -->
+          <div class="kpi_item">
+            <span class="kpi_item_label">마감 대상 월</span>
+            <h3 class="kpi_item_value text-2xl font-bold mt-2" data-summary="currentPeriod">-</h3>
+          </div>
+          <!-- 진행 상태 -->
+          <div class="kpi_item">
+            <span class="kpi_item_label">진행 상태</span>
+            <div class="mt-2"><span class="status_badge muted" id="closingStatusBadge" data-summary="status">-</span></div>
+          </div>
+          <!-- 마감 가능 여부 -->
+          <div class="kpi_item">
+            <span class="kpi_item_label">마감 가능 여부</span>
+            <div class="mt-2"><span class="status_badge danger font-bold" id="closableBadge">불가</span></div>
+          </div>
+          <!-- 미승인 / 미게시 전표 -->
+          <div class="kpi_item">
+            <span class="kpi_item_label">미승인 / 미게시 전표</span>
+            <h4 class="text-base font-bold text-slate-700 mt-2">
+              <span class="text-rose-500" data-summary="unapprovedVoucherCount">0건</span> / 
+              <span class="text-amber-500" data-summary="unpostedVoucherCount">0건</span>
+            </h4>
+          </div>
+          <!-- 마감 완료율 -->
+          <div class="kpi_item">
+            <div class="flex justify-between items-center mb-2">
+              <span class="kpi_item_label">마감 완료율</span>
+              <span class="text-xs font-bold text-indigo-600" id="completionRateText">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-indigo-600 h-full transition-all duration-500" id="completionProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 마감 타임라인 & 기간 목록 2분할 -->
+      <div class="closing_layout">
+
+        <!-- 기간 목록 테이블 (상단) -->
+        <section class="section_card closing_table_card">
+          <div class="section_card_header">
+            <h3>회계기간 목록</h3>
+          </div>
+          <div class="erp_table_container">
+            <table class="erp_table">
+              <thead>
+                <tr>
+                  <th>회계기간</th>
+                  <th>시작일</th>
+                  <th>종료일</th>
+                  <th>상태</th>
+                  <th class="amount">전표수</th>
+                  <th class="amount">총차변</th>
+                  <th class="amount">총대변</th>
+                  <th>검증상태</th>
+                  <th>마감일시</th>
+                  <th>마감자</th>
+                  <th>재오픈</th>
+                  <th>작업</th>
+                </tr>
+              </thead>
+              <tbody id="periodTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 마감 진행 현황 및 체크리스트 (하단) -->
+        <section class="section_card closing_timeline_card flex flex-col gap-6">
+          <div class="section_card_header">
+            <h3>마감 진행 통제</h3>
+            <span class="status_badge muted" id="selectedPeriodHint">기간을 선택하세요</span>
+          </div>
+
+          <!-- 월마감 프로세스 단계 바 (STEP 1 ~ STEP 5) -->
+          <div class="closing_steps_container">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">월마감 프로세스 단계</h4>
+            <div class="closing_steps">
+              <div class="step_node" id="step_1">
+                <span class="step_num">1</span>
+                <span class="step_name">전표 검증</span>
+              </div>
+              <div class="step_line" id="line_1"></div>
+              <div class="step_node" id="step_2">
+                <span class="step_num">2</span>
+                <span class="step_name">잔액 검증</span>
+              </div>
+              <div class="step_line" id="line_2"></div>
+              <div class="step_node" id="step_3">
+                <span class="step_num">3</span>
+                <span class="step_name">재무제표 생성</span>
+              </div>
+              <div class="step_line" id="line_3"></div>
+              <div class="step_node" id="step_4">
+                <span class="step_num">4</span>
+                <span class="step_name">마감 실행</span>
+              </div>
+              <div class="step_line" id="line_4"></div>
+              <div class="step_node" id="step_5">
+                <span class="step_num">5</span>
+                <span class="step_name">마감 완료</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 마감 불가 경고 영역 -->
+          <div class="alert_card danger hidden" id="closingAlertCard">
+            <div class="flex gap-3 items-start">
+              <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <h5 class="text-sm font-bold text-rose-800">⚠ 마감 불가</h5>
+                <ul class="text-xs text-rose-700 mt-2 list-disc list-inside space-y-1" id="closingAlertReasons">
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 마감 사전 체크리스트 -->
+          <div class="closing_checklist_box">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">마감 사전 체크리스트</h4>
+            <div class="checklist_items">
+              <div class="checklist_item" id="chk_voucher_approval">
+                <span class="checklist_name">1. 전표 승인 여부 (미승인 0건)</span>
+                <span class="status-pill status-PENDING">대기</span>
+              </div>
+              <div class="checklist_item" id="chk_voucher_posting">
+                <span class="checklist_name">2. 미전기 전표 여부 (미게시 0건)</span>
+                <span class="status-pill status-PENDING">대기</span>
+              </div>
+              <div class="checklist_item" id="chk_inventory_closing">
+                <span class="checklist_name">3. 재고 마감 여부 (음수 재고 0건)</span>
+                <span class="status-pill status-PENDING">대기</span>
+              </div>
+              <div class="checklist_item" id="chk_balance_check">
+                <span class="checklist_name">4. 월계 처리 여부 (차대변 일치)</span>
+                <span class="status-pill status-PENDING">대기</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 선택된 기간 액션 버튼 -->
+          <div class="closing_action_group" id="closingActions" style="display:none">
+            <button id="validateButton" type="button" class="erp_btn erp_btn_secondary" title="마감 전 데이터를 검증합니다">
+              <i data-lucide="shield-check"></i><span>마감 검증 실행</span>
+            </button>
+            <button id="closeButton" type="button" class="erp_btn erp_btn_primary" title="월 마감을 실행하여 데이터를 잠급니다">
+              <i data-lucide="lock"></i><span>월마감 실행</span>
+            </button>
+            <button id="reopenButton" type="button" class="erp_btn erp_btn_secondary" title="마감된 회계기간을 해제합니다">
+              <i data-lucide="lock-open"></i><span>마감 취소</span>
+            </button>
+            <button id="logButton" type="button" class="erp_btn erp_btn_secondary" title="마감 이력 로그를 조회합니다">
+              <i data-lucide="list"></i><span>마감 로그</span>
+            </button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- 회계기간 생성 다이얼로그 -->
+  <dialog id="periodDialog">
+    <form method="dialog" class="erp_dialog" id="periodForm">
+      <div class="erp_dialog_header">
+        <h3>회계기간 생성</h3>
+        <button type="submit" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body">
+        <div class="erp_form_grid">
+          <div class="erp_form_field">
+            <label class="erp_label" for="periodYear">회계연도</label>
+            <input id="periodYear" type="number" min="2000" max="2100" class="erp_input" required>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="periodMonth">회계월</label>
+            <input id="periodMonth" type="number" min="1" max="12" class="erp_input" required>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="periodStartDate">시작일</label>
+            <input id="periodStartDate" type="date" class="erp_input" required>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="periodEndDate">종료일</label>
+            <input id="periodEndDate" type="date" class="erp_input" required>
+          </div>
+        </div>
+      </div>
+      <div class="erp_dialog_footer">
+        <button type="submit" class="erp_btn erp_btn_secondary">닫기</button>
+        <button type="button" id="savePeriodButton" class="erp_btn erp_btn_primary">
+          <i data-lucide="save"></i><span>저장</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 마감 검증 다이얼로그 -->
+  <dialog id="validationDialog">
+    <form method="dialog" class="erp_dialog erp_dialog_wide">
+      <div class="erp_dialog_header">
+        <h3 id="validationTitle">마감 검증</h3>
+        <button type="submit" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body">
+        <div class="erp_table_container">
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th>검증유형</th>
+                <th>상태</th>
+                <th>세부내용</th>
+                <th class="amount">영향건수</th>
+                <th>처리요약</th>
+              </tr>
+            </thead>
+            <tbody id="validationTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 마감 로그 다이얼로그 -->
+  <dialog id="logDialog">
+    <form method="dialog" class="erp_dialog erp_dialog_wide">
+      <div class="erp_dialog_header">
+        <h3>마감 로그</h3>
+        <button type="submit" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body">
+        <div class="log_list" id="logList"></div>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/monthly_closing.js"></script>
+</body>
+</html>

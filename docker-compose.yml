@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: dduk-backend
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - FRONTEND_PATH=${FRONTEND_PATH:-classpath:/static/}
+      - APP_CORS_ALLOWED_ORIGIN_PATTERNS=${APP_CORS_ALLOWED_ORIGIN_PATTERNS}
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO:-update}
+      - JPA_SHOW_SQL=${JPA_SHOW_SQL:-false}
+      - JPA_FORMAT_SQL=${JPA_FORMAT_SQL:-false}
+      - SQL_INIT_MODE=${SQL_INIT_MODE:-always}
+      - SQL_INIT_CONTINUE_ON_ERROR=${SQL_INIT_CONTINUE_ON_ERROR:-true}
+      - ACCOUNTING_SEED=${ACCOUNTING_SEED:-true}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
+      - AI_SERVER_URL=http://ai-server:5000
+      - RPA_SERVER_URL=http://rpa-server:5050
+      - RPA_CALLBACK_TOKEN=${RPA_CALLBACK_TOKEN}
+    depends_on:
+      - ai-server
+      - rpa-server
+    restart: always
+
+  ai-server:
+    build:
+      context: ./ai-server
+      dockerfile: Dockerfile
+    container_name: dduk-ai-server
+    ports:
+      - "${AI_SERVER_PORT:-5000}:5000"
+    environment:
+      - AI_SERVER_HOST=0.0.0.0
+      - AI_SERVER_PORT=5000
+      - BACKEND_API_BASE_URL=http://backend:8080
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
+    restart: always
+
+  rpa-server:
+    build:
+      context: ./rpa
+      dockerfile: Dockerfile
+    container_name: dduk-rpa-server
+    ports:
+      - "${RPA_SERVER_PORT:-5050}:5050"
+    environment:
+      - RPA_SERVER_HOST=0.0.0.0
+      - RPA_SERVER_PORT=5050
+      - BACKEND_API_BASE_URL=http://backend:8080/api/v1
+      - RPA_CALLBACK_TOKEN=${RPA_CALLBACK_TOKEN}
+    restart: always

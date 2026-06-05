@@ -1,0 +1,76 @@
+/* Transactions Page Specific Styles (Underscore Naming) */
+
+/* Account Lookup Modal Specific (Inside Voucher Creation if any) */
+.account_lookup_field {
+    display: grid;
+    grid-template-columns: minmax(160px, 1fr) 40px;
+    gap: 8px;
+    align-items: center;
+}
+
+.account_lookup_search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.account_lookup_results {
+    display: grid;
+    gap: 8px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.account_lookup_row {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr) 100px 90px;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.account_lookup_row:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.account_lookup_empty {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 0.8125rem;
+}
+
+.link_cell {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.link_cell:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .account_lookup_row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .account_lookup_search,
+    .account_lookup_row {
+        grid-template-columns: 1fr;
+    }
+}

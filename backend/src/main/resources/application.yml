@@ -1,0 +1,51 @@
+server:
+  port: ${PORT:8080}
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:none}
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${JPA_FORMAT_SQL:false}
+
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:never}
+      continue-on-error: ${SQL_INIT_CONTINUE_ON_ERROR:false}
+      schema-locations:
+        - classpath:db/mysql/dduk_bootstrap_schema.sql
+        - classpath:db/mysql/task_history_schema.sql
+        - classpath:db/mysql/anomaly_log_schema.sql
+        - classpath:db/mysql/notice_schema.sql
+        - classpath:db/mysql/ocr_schema.sql
+        - classpath:db/mysql/tax_invoice_schema.sql
+      data-locations:
+        - classpath:db/mysql/dduk_bootstrap_data.sql
+        - classpath:db/mysql/dduk_sample_data.sql
+
+app:
+  accounting:
+    seed: ${ACCOUNTING_SEED:true}
+    seed-mode: ${ACCOUNTING_SEED_MODE:true}
+  cors:
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
+  frontend:
+    path: ${FRONTEND_PATH:}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+ai-server:
+  url: ${AI_SERVER_URL:http://localhost:5000}
+
+rpa-server:
+  url: ${RPA_SERVER_URL:http://localhost:5050}
+  callback-token: ${RPA_CALLBACK_TOKEN}

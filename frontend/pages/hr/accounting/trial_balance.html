@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 합계잔액시산표</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <link rel="stylesheet" href="../../../styles/accounting/trial-balance.css">
+  <style>
+    /* Table Sticky Header & UX 리인포스 */
+    .erp_table_container {
+      position: relative;
+      max-height: 600px;
+      overflow-y: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+    }
+    .erp_table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .erp_table th {
+      position: sticky;
+      top: 0;
+      background: #f1f5f9;
+      z-index: 10;
+      box-shadow: inset 0 -1px 0 var(--border);
+    }
+    /* Loading Spinner */
+    .table-loader-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    /* KPI Card Hover & Glassmorphism */
+    .kpi_card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px 24px;
+      border: 1px solid var(--border);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi_card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.08);
+      border-color: var(--accent);
+    }
+    .kpi_card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .kpi_card:hover::after {
+      opacity: 1;
+    }
+    .balance-ok {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .balance-warning {
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .summary-row {
+      background: #f8fafc;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area trial_page">
+      <section class="page_header mb-6">
+        <div class="page_title_area">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900">합계잔액시산표</h2>
+          <p class="text-sm text-slate-500 mt-1">계정 계층과 차대 대차 평형 원리를 반영하여 기초, 당기, 기말 합계 및 잔액 현황을 집계 조회합니다.</p>
+        </div>
+      </section>
+
+      <!-- 필터 설정 영역 -->
+      <section class="filter_section section_card mb-6">
+        <div class="filter_grid grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="filter_field flex flex-col">
+            <label for="startDate" class="text-xs font-semibold text-slate-500 mb-1">시작일</label>
+            <input id="startDate" type="date" class="erp_input p-2 border border-slate-200 rounded-lg text-sm" required>
+          </div>
+          <div class="filter_field flex flex-col">
+            <label for="endDate" class="text-xs font-semibold text-slate-500 mb-1">종료일</label>
+            <input id="endDate" type="date" class="erp_input p-2 border border-slate-200 rounded-lg text-sm" required>
+          </div>
+          <div class="filter_field flex flex-col">
+            <label for="reportBasis" class="text-xs font-semibold text-slate-500 mb-1">조회 기준</label>
+            <select id="reportBasis" class="erp_select p-2 border border-slate-200 rounded-lg text-sm">
+              <option value="MONTHLY">월별</option>
+              <option value="QUARTERLY">분기별</option>
+              <option value="HALF_YEARLY">반기별</option>
+              <option value="YEARLY">연도별</option>
+            </select>
+          </div>
+          <div class="filter_field flex flex-col">
+            <label for="accountLevel" class="text-xs font-semibold text-slate-500 mb-1">계정 레벨</label>
+            <select id="accountLevel" class="erp_select p-2 border border-slate-200 rounded-lg text-sm">
+              <option value="ALL">전체</option>
+              <option value="MAJOR">대분류</option>
+              <option value="MIDDLE">중분류</option>
+              <option value="SMALL">소분류</option>
+              <option value="ACCOUNT">계정과목</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="option_row mt-4 flex flex-wrap gap-6 text-sm text-slate-600 border-t border-slate-100 pt-4">
+          <label class="erp_checkbox_label flex items-center gap-2 cursor-pointer"><input id="includeZeroBalance" type="checkbox" class="erp_checkbox rounded"> <span>잔액 0인 계정 포함</span></label>
+          <label class="erp_checkbox_label flex items-center gap-2 cursor-pointer"><input id="summaryOnly" type="checkbox" class="erp_checkbox rounded"> <span>합계만 보기</span></label>
+          <label class="erp_checkbox_label flex items-center gap-2 cursor-pointer"><input id="profitLossFormat" type="checkbox" class="erp_checkbox rounded"> <span>손익계산서 형식 보기</span></label>
+        </div>
+
+        <div class="action_row mt-4 flex flex-wrap gap-2 justify-end">
+          <button id="searchButton" type="button" class="erp_btn erp_btn_primary flex items-center gap-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition"><i data-lucide="search" class="w-4 h-4"></i><span>조회</span></button>
+          <button id="expandAllButton" type="button" class="erp_btn erp_btn_secondary flex items-center gap-1 px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition"><i data-lucide="list-tree" class="w-4 h-4"></i><span>전체 펼침</span></button>
+          <button id="collapseAllButton" type="button" class="erp_btn erp_btn_secondary flex items-center gap-1 px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition"><i data-lucide="fold-horizontal" class="w-4 h-4"></i><span>전체 접기</span></button>
+          <button id="excelButton" type="button" class="erp_btn erp_btn_secondary flex items-center gap-1 px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition"><i data-lucide="download" class="w-4 h-4"></i><span>Excel</span></button>
+          <button id="printButton" type="button" class="erp_btn erp_btn_secondary flex items-center gap-1 px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium transition"><i data-lucide="printer" class="w-4 h-4"></i><span>인쇄</span></button>
+        </div>
+      </section>
+
+      <!-- KPI 카드 통계 섹션 -->
+      <section class="kpi_grid grid grid-cols-2 md:grid-cols-7 gap-4 mb-6" id="summaryCards">
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">기초 차변</div>
+            <div class="kpi_value text-lg font-bold text-slate-800 mt-1" data-summary-money="openingDebitTotal">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">기초 대변</div>
+            <div class="kpi_value text-lg font-bold text-slate-800 mt-1" data-summary-money="openingCreditTotal">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">당기 차변</div>
+            <div class="kpi_value text-lg font-bold text-slate-800 mt-1" data-summary-money="periodDebitTotal">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">당기 대변</div>
+            <div class="kpi_value text-lg font-bold text-slate-800 mt-1" data-summary-money="periodCreditTotal">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">기말 차변</div>
+            <div class="kpi_value text-lg font-bold text-slate-800 mt-1" data-summary-money="closingDebitTotal">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">기말 대변</div>
+            <div class="kpi_value text-lg font-bold text-slate-800 mt-1" data-summary-money="closingCreditTotal">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label text-xs font-semibold text-slate-400">차대 평형</div>
+            <div class="kpi_value text-base mt-1" data-summary="balanceStatus">-</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 시산표 테이블 영역 -->
+      <section class="section_card relative">
+        <div class="section_card_header flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+          <h3 class="text-base font-bold text-slate-800">시산 원장</h3>
+          <span id="periodLabel" class="status_badge muted px-3 py-1 bg-slate-100 rounded-full text-xs font-semibold text-slate-500">-</span>
+        </div>
+        
+        <div class="erp_table_container relative">
+          <!-- Loading Overlay -->
+          <div class="table-loader-overlay" id="tableLoader">
+            <div class="spinner"></div>
+          </div>
+
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th style="width: 120px;" class="p-3 text-left text-xs font-bold text-slate-600">계정코드</th>
+                <th class="p-3 text-left text-xs font-bold text-slate-600">계정과목</th>
+                <th class="amount p-3 text-right text-xs font-bold text-slate-600">기초잔액(차변)</th>
+                <th class="amount p-3 text-right text-xs font-bold text-slate-600">기초잔액(대변)</th>
+                <th class="amount p-3 text-right text-xs font-bold text-slate-600">당기합계(차변)</th>
+                <th class="amount p-3 text-right text-xs font-bold text-slate-600">당기합계(대변)</th>
+                <th class="amount p-3 text-right text-xs font-bold text-slate-600">기말잔액(차변)</th>
+                <th class="amount p-3 text-right text-xs font-bold text-slate-600">기말잔액(대변)</th>
+              </tr>
+            </thead>
+            <tbody id="trialTableBody"></tbody>
+            <tfoot id="trialTableFoot"></tfoot>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/trial_balance.js"></script>
+</body>
+</html>

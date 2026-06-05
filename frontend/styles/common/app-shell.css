@@ -1,0 +1,463 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Image 28 Based Layout with Original Palette */
+    --primary-color: #8B3A3A;
+    --primary-hover: #722F2F;
+    --primary-light: #F9F1F1;
+    --secondary-color: #6B7280;
+    
+    --sidebar-bg: #F8F9FA;
+    --sidebar-text: #4B5563;
+    --sidebar-hover: #EDF0F2;
+    --sidebar-border: #E9ECEF;
+    
+    --bg-color: #FFFFFF;
+    --surface-color: #FFFFFF;
+    --text-color: #333333;
+    --muted-text-color: #8E959F;
+    --border-color: #E9ECEF;
+    
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.03);
+    --radius-md: 8px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+}
+
+.app-sidebar {
+    background-color: #FFFFFF; /* Pure white as in the image */
+    color: #4B5563;
+    padding: 2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #F3F4F6;
+    z-index: 10;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.app-sidebar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.sidebar-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0 1.5rem;
+}
+
+.sidebar-logo img {
+    height: 22px;
+    width: auto;
+}
+
+.sidebar-logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #000;
+    letter-spacing: -1px;
+}
+
+.home-btn {
+    background: #F3F4F6;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4B5563;
+}
+
+.app-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-header {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #9CA3AF;
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-header:hover {
+    color: #4B5563;
+}
+
+.nav-header::after {
+    content: '▼';
+    font-size: 0.6rem;
+    margin-left: auto;
+    opacity: 0.5;
+    transition: transform 0.2s;
+}
+
+.nav-group.expanded .nav-header::after {
+    transform: rotate(180deg);
+}
+
+.nav-items {
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.nav-group.expanded .nav-items {
+    display: flex;
+}
+
+.app-sidebar a {
+    color: #4B5563;
+    text-decoration: none;
+    padding: 0.625rem 0.5rem 0.625rem 2.5rem; /* Indented as in image */
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.app-sidebar a:hover {
+    color: var(--primary-color);
+}
+
+.app-sidebar a[aria-current="page"] {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 2rem;
+}
+
+.app-user {
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-bottom: 0.5rem;
+}
+
+.user-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.app-user button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #FFFFFF;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.app-user button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.app-main {
+    padding: 1.5rem;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.app-header h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.6rem;
+}
+
+.app-header p {
+    margin: 0;
+    color: var(--muted-text-color);
+}
+
+.panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-card .label {
+    font-size: 0.875rem;
+    color: var(--muted-text-color);
+    font-weight: 500;
+}
+
+.stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+    font-family: 'S-CoreDream', sans-serif;
+}
+
+.stat-card .trend {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.trend.up { color: #10B981; }
+.trend.down { color: #EF4444; }
+
+.panel {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s ease;
+}
+
+.panel:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.panel h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.panel p,
+.panel li {
+    margin: 0;
+    color: var(--muted-text-color);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.panel ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.form-field {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.form-field label {
+    font-size: 0.9rem;
+    color: var(--muted-text-color);
+}
+
+.form-field input,
+.form-field select {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+
+.inline-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.inline-actions button,
+.actions button {
+    padding: 0.55rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.table-shell {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.data-table th {
+    font-size: 0.9rem;
+    color: var(--muted-text-color);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+}
+
+.stack {
+    display: grid;
+    gap: 1rem;
+}
+
+.message {
+    min-height: 1.25rem;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.message.error {
+    color: #c62828;
+}
+
+.message.success {
+    color: #2e7d32;
+}
+
+@media (max-width: 900px) {
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .app-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .app-header {
+        flex-direction: column;
+    }
+
+    .app-user {
+        width: 100%;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+}
+
+/* ==========================================
+   Account-Security Page Standard Style Unified
+   ========================================== */
+
+/* 1. DM Sans 폰트 강제 적용 (html body 선택자로 구체성 강화) */
+html body {
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* 2. content_area 패딩 및 너비/마진 통일 (선택자 구체성 강화를 통해 !important 없이 Tailwind 극복) */
+body .main_wrap main.content_area {
+    padding: 24px;
+    max-width: none;
+    margin: 0;
+}
+
+/* 3. content_area 자식 간격 통일 (space-y-8 = 32px 기준) */
+body .main_wrap main.content_area > * + * {
+    margin-top: 32px;
+}
+
+

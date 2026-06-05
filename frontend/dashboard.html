@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP Dashboard</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/common/dashboard.css">
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/resizing_sdk.js" type="text/javascript"></script>
+</head>
+
+<body data-template-id="__page-root" class="w-full">
+  <aside data-dduk-sidebar></aside><!-- Main -->
+  <div class="main_wrap"><!-- Topbar -->
+    <header class="topbar"><button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()"
+        id="mobile_menu_btn" aria-label="메뉴"><i class="dduk-inline-028" data-lucide="menu"></i></button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030"><i class="dduk-inline-031" data-lucide="search"></i> <input class="dduk-inline-032"
+            type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033"><button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034"
+            data-lucide="bell"></i></button> <button class="sidebar_icon_btn" aria-label="프로필"><i
+            class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header><!-- Content -->
+    <main class="content_area dduk-inline-035"><!-- Page Title -->
+      <div class="dduk-inline-036">
+        <h2 data-template-id="page-heading" class="canva-text dduk-inline-037"></h2>
+        <p data-template-id="page-subheading" class="canva-text dduk-inline-038"></p>
+      </div><!-- KPI Cards -->
+      <div class="kpi_grid dduk-inline-039">
+        <div class="kpi_card">
+          <p class="dduk-inline-040">오늘 매출</p>
+          <p class="dduk-inline-041">₩128,400,000</p>
+          <p class="dduk-inline-042">▲ 12.4% 전일 대비</p>
+        </div>
+        <div class="kpi_card">
+          <p class="dduk-inline-040">이번달 발주</p>
+          <p class="dduk-inline-041">₩2.14억</p>
+          <p class="dduk-inline-042">▲ 8.2% 전월 대비</p>
+        </div>
+        <div class="kpi_card">
+          <p class="dduk-inline-040">현재 재고</p>
+          <p class="dduk-inline-041">24,820건</p>
+          <p class="dduk-inline-043">▼ 3.1% 전주 대비</p>
+        </div>
+        <div class="kpi_card">
+          <p class="dduk-inline-040">미정산 금액</p>
+          <p class="dduk-inline-041">₩18,200,000</p>
+          <p class="dduk-inline-044">3건 기한 초과</p>
+        </div>
+        <div class="kpi_card">
+          <p class="dduk-inline-040">활성 거래처</p>
+          <p class="dduk-inline-041">182개</p>
+          <p class="dduk-inline-042">▲ 4 신규 등록</p>
+        </div>
+        <div class="kpi_card">
+          <p class="dduk-inline-040">AI 엔진</p>
+          <p class="dduk-inline-045"><span class="status_dot dduk-inline-026"></span>Online</p>
+          <p class="dduk-inline-046">응답시간 42ms</p>
+        </div>
+      </div><!-- Activity Table -->
+      <div class="section_card dduk-inline-067">
+        <h3 class="dduk-inline-048">최근 시스템 활동</h3>
+        <div class="table_row dduk-inline-068">
+          <span>시간</span><span>사용자</span><span>작업</span><span>대상</span><span>상태</span>
+        </div>
+        <div class="table_row">
+          <span class="dduk-inline-069">09:42</span><span>김도연</span><span>발주 승인</span><span>PO-2026-0514</span><span class="dduk-inline-070">완료</span>
+        </div>
+        <div class="table_row">
+          <span class="dduk-inline-069">09:38</span><span>이수진</span><span>전표 기표</span><span>JRN-2026-0087</span><span class="dduk-inline-070">완료</span>
+        </div>
+        <div class="table_row">
+          <span class="dduk-inline-069">09:31</span><span>박현우</span><span>재고 이동</span><span>WH-A → WH-C</span><span class="dduk-inline-071">진행중</span>
+        </div>
+        <div class="table_row">
+          <span class="dduk-inline-069">09:25</span><span>AI엔진</span><span>이상 거래 감지</span><span>TXN-82914</span><span class="dduk-inline-072">확인필요</span>
+        </div>
+        <div class="table_row dduk-inline-073">
+          <span class="dduk-inline-069">09:12</span><span>최민지</span><span>OCR 업로드</span><span>영수증 3건</span><span class="dduk-inline-070">완료</span>
+        </div>
+      </div><!-- AI + Notices Row -->
+      <div class="dduk-inline-074"><!-- AI Insights -->
+        <div class="section_card">
+          <h3 class="dduk-inline-075"><i class="dduk-inline-022" data-lucide="brain"></i>AI 비즈니스 인사이트</h3>
+          <div class="dduk-inline-076">
+            <div class="insight_card dduk-inline-077">
+              <p class="dduk-inline-023">재고 부족 예측</p>
+              <p class="dduk-inline-078">녹차 원재료 3일 내 안전재고 하회 예상</p>
+            </div>
+            <div class="insight_card dduk-inline-079">
+              <p class="dduk-inline-023">이상 거래 감지</p>
+              <p class="dduk-inline-078">거래처 B의 단가 32% 급등 · 확인 필요</p>
+            </div>
+            <div class="insight_card dduk-inline-080">
+              <p class="dduk-inline-023">자동 발주 추천</p>
+              <p class="dduk-inline-078">포장재 A 발주 최적 시점 도래</p>
+            </div>
+          </div>
+        </div><!-- Notices -->
+        <div class="section_card">
+          <h3 class="dduk-inline-048">공지사항</h3>
+          <div class="dduk-inline-057">
+            <div class="dduk-inline-058">
+              <div>
+                <p class="dduk-inline-023">시스템 점검 안내</p>
+                <p class="dduk-inline-024">2026.05.18 02:00~04:00</p>
+              </div><span class="dduk-inline-081">중요</span>
+            </div>
+            <div class="dduk-inline-058">
+              <div>
+                <p class="dduk-inline-023">OCR 엔진 v3.2 업데이트</p>
+                <p class="dduk-inline-024">2026.05.12 · 기술팀</p>
+              </div><span class="dduk-inline-082">업데이트</span>
+            </div>
+            <div class="dduk-inline-058">
+              <div>
+                <p class="dduk-inline-023">신규 거래처 등록 정책 변경</p>
+                <p class="dduk-inline-024">2026.05.10 · 운영팀</p>
+              </div><span class="dduk-inline-083">일반</span>
+            </div>
+          </div>
+        </div>
+      </div><!-- Quick Actions -->
+      <div class="section_card">
+        <h3 class="dduk-inline-048">빠른 작업</h3>
+        <div class="dduk-inline-084">
+          <button class="quick_action_btn" onclick="location.href='pages/inventory/purchase-request.html'"><i class="dduk-inline-012" data-lucide="file-plus"></i>발주 요청 생성</button>
+          <button class="quick_action_btn" onclick="location.href='pages/hr/accounting/transactions.html'"><i class="dduk-inline-012" data-lucide="file-text"></i>전표 등록</button>
+          <button class="quick_action_btn" onclick="location.href='pages/hr/accounting/wip.html'"><i class="dduk-inline-012" data-lucide="upload"></i>증빙 업로드</button>
+          <button class="quick_action_btn" onclick="location.href='pages/inventory/vendors.html'"><i class="dduk-inline-012" data-lucide="building"></i>거래처 추가</button>
+          <button class="quick_action_btn" onclick="location.href='pages/inventory/transfers.html'"><i class="dduk-inline-012" data-lucide="truck"></i>재고 이동</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="/_sdk/editing_sdk.js"></script>
+  <script src="services/common/sidebar.js"></script>
+  <script src="services/common/dashboard.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const userName = localStorage.getItem('userName') || '게스트';
+      const pageHeading = document.querySelector('[data-template-id="page-heading"]');
+      const pageSubheading = document.querySelector('[data-template-id="page-subheading"]');
+      
+      if (pageHeading) {
+        pageHeading.textContent = `${userName}님, 환영합니다!`;
+      }
+      if (pageSubheading) {
+        pageSubheading.textContent = 'DDUK ERP 통합 대시보드에 오신 것을 환영합니다. 비즈니스 현황을 한눈에 확인하세요.';
+      }
+    });
+  </script>
+
+</body>
+
+</html>

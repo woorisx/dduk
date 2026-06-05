@@ -1,0 +1,12 @@
+.git
+.gitignore
+.vscode
+.local-run
+
+**/build
+**/.gradle
+**/venv
+**/__pycache__
+
+docs
+node_modules

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDUK ERP - 인사/회계 메인</title>
+    <link rel="stylesheet" href="../../styles/common/app-shell.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <h1>DDUK ERP</h1>
+            <nav data-nav></nav>
+        </aside>
+        <main class="app-main">
+            <header class="app-header">
+                <div>
+                    <h2 data-page-title>인사/회계 메인</h2>
+                    <p data-page-description>직원, 근태, 급여, 비용 관리의 시작 화면이다.</p>
+                </div>
+                <section class="app-user">
+                    <dl>
+                        <dt>이름</dt>
+                        <dd data-user-name>-</dd>
+                        <dt>아이디</dt>
+                        <dd data-login-id>-</dd>
+                        <dt>권한</dt>
+                        <dd data-role>-</dd>
+                    </dl>
+                    <button type="button" data-action="logout">로그아웃</button>
+                </section>
+            </header>
+
+            <section class="panel-grid" data-summary-cards></section>
+
+            <section class="content-grid">
+                <div class="stack">
+                    <section class="panel">
+                        <h3>팀 작업 시작 포인트</h3>
+                        <ul data-todo-list></ul>
+                    </section>
+                    <section class="panel">
+                        <h3>우선 연결할 API</h3>
+                        <ul data-api-list></ul>
+                    </section>
+                </div>
+                <div class="stack">
+                    <section class="panel">
+                        <h3>중심 테이블</h3>
+                        <ul data-table-list></ul>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/app-shell.js"></script>
+    <script src="../../services/common/dashboard.js"></script>
+</body>
+</html>

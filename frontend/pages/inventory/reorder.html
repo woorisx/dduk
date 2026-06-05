@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DDUK ERP 추천 발주 목록">
+    <title>추천 발주 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        body { font-family: "DM Sans", sans-serif; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+        .summary-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.2rem 1.3rem; box-shadow: 0 1px 3px rgba(0,0,0,.02); }
+        .summary-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; }
+        .summary-value { font-size: 1.7rem; font-weight: 700; color: #1e293b; line-height: 1; margin-top: 0.9rem; }
+        .summary-label { margin-top: 0.35rem; font-size: 0.75rem; font-weight: 500; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase; }
+        .filter-chip { border: 1px solid #e2e8f0; border-radius: 999px; padding: 0.45rem 0.9rem; font-size: 0.78rem; font-weight: 600; color: #475569; background: #fff; transition: all 0.16s ease; }
+        .filter-chip.active { border-color: #0f766e; background: #ccfbf1; color: #115e59; }
+        .status-badge, .urgency-badge { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.35rem 0.72rem; font-size: 0.72rem; font-weight: 600; }
+        .status-READY { color: #065f46; background: #d1fae5; }
+        .status-REVIEW { color: #9a3412; background: #ffedd5; }
+        .status-DISABLED { color: #374151; background: #f3f4f6; }
+        .urgency-CRITICAL { color: #b91c1c; background: #fee2e2; }
+        .urgency-HIGH { color: #c2410c; background: #ffedd5; }
+        .urgency-MEDIUM { color: #a16207; background: #fef3c7; }
+        .urgency-LOW { color: #166534; background: #dcfce7; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { text-align: left; font-size: 0.74rem; font-weight: 600; color: #475569; padding: 0.95rem 1rem; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; letter-spacing: 0.05em; background: #f9fafb; }
+        .data-table td { padding: 1rem; border-bottom: 1px solid #f3f4f6; vertical-align: top; font-size: 0.88rem; color: #1f2937; }
+        .data-table tr:hover td { background: #fcfffe; }
+        .metric { font-size: 0.82rem; color: #64748b; }
+        .metric strong { color: #1e293b; font-weight: 600; }
+        .action-btn { border-radius: 0.5rem; padding: 0.6rem 0.9rem; font-size: 0.78rem; font-weight: 600; transition: all 0.16s ease; }
+        .action-btn-ready { background: #0f766e; color: #fff; }
+        .action-btn-ready:hover { background: #115e59; }
+        .action-btn-muted { background: #e5e7eb; color: #64748b; cursor: not-allowed; }
+        .skeleton { background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 0.45rem; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<aside data-dduk-sidebar></aside>
+<div class="main_wrap">
+    <header class="topbar px-6 py-4 bg-white border-b flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                <i data-lucide="menu"></i>
+            </button>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">추천 발주</h1>
+                <p class="text-sm text-gray-500 mt-1">재고, 최근 출고, 발주 리드타임 근거를 함께 보는 Phase 3 MVP</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="last-updated" class="text-xs text-gray-400 font-medium"></span>
+            <button id="refresh-btn" class="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                새로고침
+            </button>
+        </div>
+    </header>
+
+    <main class="content_area p-6 space-y-6">
+        <section class="summary-grid">
+            <article class="summary-card">
+                <div class="summary-icon bg-emerald-100 text-emerald-700"><i data-lucide="badge-check" class="w-5 h-5"></i></div>
+                <div class="summary-value" id="cnt-ready">-</div>
+                <div class="summary-label">추천 가능</div>
+            </article>
+            <article class="summary-card">
+                <div class="summary-icon bg-orange-100 text-orange-700"><i data-lucide="shield-alert" class="w-5 h-5"></i></div>
+                <div class="summary-value" id="cnt-review">-</div>
+                <div class="summary-label">수동 검토</div>
+            </article>
+            <article class="summary-card">
+                <div class="summary-icon bg-gray-200 text-gray-700"><i data-lucide="pause-circle" class="w-5 h-5"></i></div>
+                <div class="summary-value" id="cnt-disabled">-</div>
+                <div class="summary-label">비활성</div>
+            </article>
+            <article class="summary-card">
+                <div class="summary-icon bg-rose-100 text-rose-700"><i data-lucide="alert-octagon" class="w-5 h-5"></i></div>
+                <div class="summary-value" id="cnt-critical">-</div>
+                <div class="summary-label">긴급 품목</div>
+            </article>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-xl p-4 md:p-5">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800">필터</h2>
+                    <p class="text-xs text-gray-500 mt-1">추천 상태와 긴급도를 기준으로 바로 걸러볼 수 있어.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button class="filter-chip active" data-filter-type="status" data-filter-value="">전체 상태</button>
+                    <button class="filter-chip" data-filter-type="status" data-filter-value="READY">추천 가능</button>
+                    <button class="filter-chip" data-filter-type="status" data-filter-value="REVIEW">수동 검토</button>
+                    <button class="filter-chip" data-filter-type="status" data-filter-value="DISABLED">비활성</button>
+                    <button class="filter-chip" data-filter-type="urgency" data-filter-value="CRITICAL">긴급만</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>품목</th>
+                        <th>상태</th>
+                        <th>재고 / 발주량</th>
+                        <th>근거</th>
+                        <th>공급처</th>
+                        <th>액션</th>
+                    </tr>
+                    </thead>
+                    <tbody id="recommendation-list"></tbody>
+                </table>
+            </div>
+            <div id="empty-state" class="hidden px-6 py-16 text-center">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <i data-lucide="inbox" class="w-8 h-8"></i>
+                </div>
+                <p class="text-lg font-bold text-slate-800">표시할 추천 항목이 없어.</p>
+                <p class="mt-2 text-sm text-gray-500">현재 필터 기준으로는 발주 검토 대상이 잡히지 않았어.</p>
+            </div>
+        </section>
+
+        <section class="rounded-xl border border-teal-200 bg-teal-50 px-5 py-4 text-sm text-teal-900">
+            <p class="font-bold text-teal-950">Phase 3 fallback 규칙</p>
+            <p class="mt-2">최근 30일 출고 근거가 부족하면 비활성, 리드타임 근거가 없으면 비활성, 재고나 계산값이 비정상이면 수동 검토로 돌린다. 추천 가능 상태만 발주 요청 버튼을 열어둔다.</p>
+        </section>
+    </main>
+</div>
+
+<script src="../../services/common/apiClient.js"></script>
+<script src="../../services/inventory/inventory-service.js"></script>
+<script src="../../services/common/sidebar.js"></script>
+<script src="../../services/inventory/inventory-reorder-page.js?v=20260604"></script>
+
+
+</body>
+</html>

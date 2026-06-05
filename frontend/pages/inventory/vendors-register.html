@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거래처 등록 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:#374151}
+        .form-input,.form-select,.form-textarea{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .form-input[readonly]{background:#f9fafb;color:#6b7280}
+        .postcode-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:center}
+        .address-search-btn{display:inline-flex;align-items:center;justify-content:center;gap:.375rem;white-space:nowrap;border-radius:.5rem;background:#4f46e5;color:#fff;padding:.75rem 1rem;font-size:.875rem;font-weight:700}
+        .address-search-btn:hover{background:#4338ca}
+        .form-textarea{min-height:96px;resize:vertical}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+                <h1 class="text-xl font-bold text-gray-800">거래처 등록</h1>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="history.back()" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">취소</button>
+                <button type="button" id="btn-save" class="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> 저장</button>
+            </div>
+        </header>
+
+        <main class="content_area p-6 max-w-5xl mx-auto">
+            <form id="vendor-form" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-5">기본 정보</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label><span class="form-label">거래처 코드</span><input class="form-input" value="저장 시 자동 생성" readonly></label>
+                    <label><span class="form-label">거래처명</span><input name="name" class="form-input" required></label>
+                    <label><span class="form-label">대표자명</span><input name="representativeName" class="form-input" required></label>
+                    <label><span class="form-label">사업자등록번호</span><input name="businessRegistrationNo" class="form-input" placeholder="000-00-00000" required></label>
+                    <label><span class="form-label">업태</span><input name="businessType" class="form-input" required></label>
+                    <label><span class="form-label">종목</span><input name="businessItem" class="form-input" required></label>
+                    <label><span class="form-label">상태</span><select name="status" class="form-select" required><option value="ACTIVE">활성</option><option value="INACTIVE">비활성</option></select></label>
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800 mt-8 mb-5 pt-6 border-t border-gray-100">연락처 정보</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label><span class="form-label">담당자명</span><input name="contactName" class="form-input" required></label>
+                    <label><span class="form-label">전화번호</span><input name="contactPhone" class="form-input" required></label>
+                    <label><span class="form-label">이메일</span><input name="email" type="email" class="form-input" required></label>
+                    <label class="md:col-span-2">
+                        <span class="form-label">우편번호</span>
+                        <span class="postcode-row">
+                            <input name="zonecode" id="zonecode" class="form-input" required readonly>
+                            <button type="button" id="btn-search-address" class="address-search-btn">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                                주소 검색
+                            </button>
+                        </span>
+                    </label>
+                    <label class="md:col-span-2"><span class="form-label">주소</span><input name="address" id="address" class="form-input" required readonly></label>
+                    <label class="md:col-span-2"><span class="form-label">상세주소</span><input name="detailAddress" id="detailAddress" class="form-input" placeholder="동, 호수 등 상세주소"></label>
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800 mt-8 mb-5 pt-6 border-t border-gray-100">계좌 정보</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label><span class="form-label">은행명</span><input name="bankName" class="form-input" required></label>
+                    <label><span class="form-label">계좌번호</span><input name="bankAccountNo" class="form-input" required></label>
+                    <label><span class="form-label">예금주</span><input name="bankAccountHolder" class="form-input" required></label>
+                    <label class="md:col-span-2"><span class="form-label">비고</span><textarea name="memo" class="form-textarea"></textarea></label>
+                </div>
+                <div id="message" class="mt-5 min-h-6 text-sm font-semibold text-gray-500"></div>
+            </form>
+        </main>
+    </div>
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-vendors-register-page.js"></script>
+    
+
+</body>
+</html>

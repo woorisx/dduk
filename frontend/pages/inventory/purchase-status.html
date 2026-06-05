@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발주 상태 관리 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:700;color:#374151}
+        .form-input,.form-select{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:focus,.form-select:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .data-table{width:100%;border-collapse:separate;border-spacing:0}
+        .data-table th{background:#f9fafb;padding:.75rem;text-align:left;font-size:.75rem;font-weight:800;color:#6b7280;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+        .data-table td{padding:.875rem .75rem;font-size:.875rem;color:#374151;border-bottom:1px solid #f3f4f6;vertical-align:top}
+        .status-badge{display:inline-flex;align-items:center;border-radius:999px;padding:.25rem .625rem;font-size:.75rem;font-weight:800;background:#f3f4f6;color:#374151;white-space:nowrap}
+        .status-ORDERED,.status-PENDING,.status-REQUESTED{background:#eef2ff;color:#4338ca}
+        .status-APPROVED{background:#ecfdf5;color:#047857}
+        .status-SENT_TO_VENDOR{background:#f0fdfa;color:#0f766e}
+        .status-INBOUND_DELAY{background:#fff1f2;color:#be123c}
+        .status-RECEIVING{background:#fff7ed;color:#c2410c}
+        .status-RECEIVED,.status-COMPLETED{background:#eff6ff;color:#1d4ed8}
+        .status-CANCELLED{background:#fef2f2;color:#b91c1c}
+        .ps-pagination{display:flex;align-items:center;justify-content:center;gap:.375rem;padding:1rem;flex-wrap:wrap}
+        .ps-btn{min-width:2.25rem;height:2.25rem;display:inline-flex;align-items:center;justify-content:center;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;font-size:.8125rem;font-weight:700;color:#374151;cursor:pointer;transition:all .15s}
+        .ps-btn:hover:not(:disabled):not(.active){background:#f3f4f6}
+        .ps-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
+        .ps-btn:disabled{cursor:not-allowed;opacity:.4}
+        .ps-btn.nav{padding:0 .625rem;font-weight:800}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">발주 상태 관리</h1>
+                    <p id="message" class="text-sm text-gray-500 mt-1">데이터를 불러오는 중입니다...</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="content_area p-6 max-w-7xl mx-auto">
+            <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-6">
+                <form id="search-form" class="p-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+                    <label>
+                        <span class="form-label">검색어</span>
+                        <input id="keyword" class="form-input" placeholder="발주번호, 거래처명, 요청자명 또는 요청자 ID를 입력하세요" autocomplete="off">
+                    </label>
+                    <button type="submit" class="h-11 px-5 text-sm font-bold text-white bg-gray-900 rounded-lg hover:bg-gray-800 flex items-center justify-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4"></i> 검색
+                    </button>
+                </form>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-800">발주 목록</h2>
+                    <p class="text-sm text-gray-500 mt-1">상태 변경을 선택하면 발주서 상태가 저장됩니다.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>발주번호</th>
+                                <th>거래처</th>
+                                <th>요청자 / 승인자</th>
+                                <th>품목</th>
+                                <th>합계액</th>
+                                <th>현재 상태</th>
+                                <th>상태 변경</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-body">
+                            <tr><td colspan="7" class="text-center text-gray-400 font-semibold py-8">데이터를 불러오는 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pagination-area" class="ps-pagination"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-purchase-status-page.js"></script>
+    
+
+</body>
+</html>

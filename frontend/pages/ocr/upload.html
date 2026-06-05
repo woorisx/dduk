@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 증빙 업로드</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../styles/admin/admin-pages.css">
+</head>
+
+<body class="w-full">
+  <aside data-dduk-sidebar></aside>
+
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="flex-1 px-4">
+        <h2 class="text-lg font-semibold text-gray-800">증빙 업로드</h2>
+      </div>
+    </header>
+
+    <main class="content_area space-y-6 p-6">
+      <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-slate-900">OCR 증빙 업로드</h1>
+          <p class="mt-2 text-sm text-slate-500">영수증, 송장, 발주서 같은 증빙 이미지를 올리면 AI가 기본 항목을 추출해 문서함에 저장한다.</p>
+        </div>
+
+        <div id="uploadMessage" class="hidden"></div>
+
+        <form id="ocrUploadForm" class="mt-6 space-y-6">
+          <div class="max-w-2xl mx-auto space-y-6">
+            <div class="grid gap-6 md:grid-cols-2">
+              <div class="relative block">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">문서 유형</span>
+                <select id="documentType" class="hidden">
+                  <option value="RECEIPT" selected>영수증</option>
+                  <option value="INVOICE">송장</option>
+                  <option value="PURCHASE_ORDER">발주서</option>
+                  <option value="STATEMENT">거래명세서</option>
+                </select>
+                
+                <!-- 커스텀 드롭다운 트리거 버튼 -->
+                <button type="button" id="customSelectBtn" class="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                  <div class="flex items-center gap-2.5">
+                    <div id="selectedIcon" class="text-indigo-500 flex items-center justify-center">
+                      <i data-lucide="receipt" class="h-4.5 w-4.5"></i>
+                    </div>
+                    <span id="selectedLabel" class="font-semibold text-slate-800">영수증 (Receipt)</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 transition-transform duration-300" id="customSelectChevron"></i>
+                </button>
+
+                <!-- 커스텀 드롭다운 레이어 -->
+                <div id="customSelectOptions" class="hidden absolute left-0 right-0 mt-2 z-50 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-200/80 animate-fade-in space-y-1">
+                  <button type="button" class="custom-option-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-slate-50 transition-all duration-200" data-value="RECEIPT" data-icon="receipt" data-label="영수증 (Receipt)">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500">
+                      <i data-lucide="receipt" class="h-4.5 w-4.5"></i>
+                    </div>
+                    <div>
+                      <span class="block text-xs font-bold text-slate-800">영수증 (Receipt)</span>
+                      <span class="block text-[10px] text-slate-400">카드 영수증, 간이 영수증 등 지출 증빙 자료</span>
+                    </div>
+                  </button>
+
+                  <button type="button" class="custom-option-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-slate-50 transition-all duration-200" data-value="INVOICE" data-icon="file-text" data-label="세금계산서 / 송장 (Invoice)">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500">
+                      <i data-lucide="file-text" class="h-4.5 w-4.5"></i>
+                    </div>
+                    <div>
+                      <span class="block text-xs font-bold text-slate-800">세금계산서 / 송장 (Invoice)</span>
+                      <span class="block text-[10px] text-slate-400">세금계산서 및 기업간 대금 청구 문서</span>
+                    </div>
+                  </button>
+
+                  <button type="button" class="custom-option-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-slate-50 transition-all duration-200" data-value="PURCHASE_ORDER" data-icon="package" data-label="발주서 (Purchase Order)">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500">
+                      <i data-lucide="package" class="h-4.5 w-4.5"></i>
+                    </div>
+                    <div>
+                      <span class="block text-xs font-bold text-slate-800">발주서 (Purchase Order)</span>
+                      <span class="block text-[10px] text-slate-400">구매 계약서 및 물품 발주 요청서</span>
+                    </div>
+                  </button>
+
+                  <button type="button" class="custom-option-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-slate-50 transition-all duration-200" data-value="STATEMENT" data-icon="clipboard" data-label="거래명세서 (Statement)">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500">
+                      <i data-lucide="clipboard" class="h-4.5 w-4.5"></i>
+                    </div>
+                    <div>
+                      <span class="block text-xs font-bold text-slate-800">거래명세서 (Statement)</span>
+                      <span class="block text-[10px] text-slate-400">품목 명세와 수량이 기록된 거래 내역서</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div class="block">
+                <span class="mb-2 block text-sm font-semibold text-slate-700">업로드 방식</span>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-600 font-medium flex items-center gap-2">
+                  <i data-lucide="cpu" class="h-4 w-4 text-indigo-500 animate-pulse"></i>
+                  <span>AI 모델 자동 파싱 활성화됨</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="block">
+              <span class="mb-2 block text-sm font-semibold text-slate-700">증빙 파일 등록</span>
+              <input id="ocrFile" type="file" accept="image/png,image/jpeg,image/webp" class="hidden">
+              <div id="dropzone" class="group relative flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50/30 py-12 px-6 text-center cursor-pointer transition-all duration-300 hover:border-indigo-400 hover:bg-indigo-50/10 hover:shadow-lg hover:shadow-indigo-100/30">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-md text-slate-400 transition-all duration-300 group-hover:scale-110 group-hover:text-indigo-500 group-hover:shadow-indigo-100/50">
+                  <i data-lucide="upload-cloud" class="h-7 w-7"></i>
+                </div>
+                <h3 class="mt-4 text-base font-bold text-slate-800">이곳에 파일을 끌어다 놓거나 클릭하세요</h3>
+                <p class="mt-2 text-xs text-slate-400">지원 형식: PNG, JPG, WEBP (최대 10MB)</p>
+                <div id="selectedFileName" class="hidden mt-4 rounded-2xl bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-700 border border-indigo-100 flex items-center gap-2 animate-fade-in shadow-sm">
+                  <i data-lucide="file-check" class="h-4 w-4 text-indigo-500"></i>
+                  <span id="fileNameText">filename.png</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button id="uploadSubmitBtn" type="submit" class="w-full sm:w-auto min-w-[160px] rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/80 active:translate-y-0 flex items-center justify-center gap-2">
+                <span>OCR 분석 요청</span>
+                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section id="uploadResult" class="hidden rounded-3xl border border-emerald-100 bg-emerald-50/20 p-8 shadow-sm max-w-2xl mx-auto transition-all duration-300">
+        <div class="flex items-center gap-3 mb-6 text-emerald-800">
+          <i data-lucide="check-circle" class="h-6 w-6 text-emerald-500"></i>
+          <h2 class="text-lg font-bold">성공적으로 등록되었습니다!</h2>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="rounded-2xl border border-emerald-100/50 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">문서 ID</div>
+            <div id="resultDocumentId" class="mt-2 text-sm font-bold text-slate-800"></div>
+          </div>
+          <div class="rounded-2xl border border-emerald-100/50 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">파일명</div>
+            <div id="resultFilename" class="mt-2 text-sm font-bold text-slate-800 truncate"></div>
+          </div>
+          <div class="rounded-2xl border border-emerald-100/50 bg-white p-5 shadow-sm">
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">처리 상태</div>
+            <div id="resultStatus" class="mt-2 text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span>PROCESSING</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-center gap-3">
+          <a href="./ocr-box.html" class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3.5 text-xs font-bold text-white transition-all hover:bg-emerald-500 hover:shadow-md hover:shadow-emerald-100">
+            <span>OCR 문서함으로 이동</span>
+            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../services/common/session.js"></script>
+  <script src="../../services/common/app-shell.js"></script>
+  <script src="../../services/common/sidebar.js"></script>
+  <script src="../../services/admin/ocr/ocr-documents-shared.js"></script>
+  <script src="../../services/admin/ocr/ocr-upload-page.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+      window.ddukAppShell.hydratePage({
+        title: "증빙 업로드",
+        description: "OCR 분석용 증빙 이미지를 업로드하고 문서함으로 보낸다."
+      });
+
+      // 커스텀 select 제어 스크립트
+      const customSelectBtn = document.getElementById("customSelectBtn");
+      const customSelectOptions = document.getElementById("customSelectOptions");
+      const customSelectChevron = document.getElementById("customSelectChevron");
+      const selectedIcon = document.getElementById("selectedIcon");
+      const selectedLabel = document.getElementById("selectedLabel");
+      const documentTypeSelect = document.getElementById("documentType");
+
+      if (customSelectBtn && customSelectOptions) {
+        customSelectBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const isHidden = customSelectOptions.classList.contains("hidden");
+          if (isHidden) {
+            customSelectOptions.classList.remove("hidden");
+            customSelectChevron.classList.add("rotate-180");
+          } else {
+            customSelectOptions.classList.add("hidden");
+            customSelectChevron.classList.remove("rotate-180");
+          }
+        });
+
+        const optionButtons = customSelectOptions.querySelectorAll(".custom-option-btn");
+        optionButtons.forEach(btn => {
+          btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const val = btn.getAttribute("data-value");
+            const icon = btn.getAttribute("data-icon");
+            const label = btn.getAttribute("data-label");
+
+            // hidden select 값 변경
+            if (documentTypeSelect) {
+              documentTypeSelect.value = val;
+              documentTypeSelect.dispatchEvent(new Event("change"));
+            }
+
+            // 버튼 UI 변경
+            if (selectedLabel) {
+              selectedLabel.textContent = label;
+            }
+            if (selectedIcon) {
+              selectedIcon.innerHTML = `<i data-lucide="${icon}" class="h-4.5 w-4.5"></i>`;
+              if (window.lucide) {
+                window.lucide.createIcons();
+              }
+            }
+
+            // 드롭다운 닫기
+            customSelectOptions.classList.add("hidden");
+            customSelectChevron.classList.remove("rotate-180");
+          });
+        });
+
+        // 바깥 영역 클릭 시 닫기
+        document.addEventListener("click", function () {
+          if (!customSelectOptions.classList.contains("hidden")) {
+            customSelectOptions.classList.add("hidden");
+            customSelectChevron.classList.remove("rotate-180");
+          }
+        });
+      }
+
+      // 드래그 앤 드롭 기능 추가
+      const dropzone = document.getElementById("dropzone");
+      const fileInput = document.getElementById("ocrFile");
+      const selectedFileName = document.getElementById("selectedFileName");
+      const fileNameText = document.getElementById("fileNameText");
+
+      if (dropzone && fileInput) {
+        dropzone.addEventListener("click", () => fileInput.click());
+
+        dropzone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("border-slate-300", "bg-slate-50/30");
+          dropzone.classList.add("border-indigo-400", "bg-indigo-50/10", "shadow-lg", "shadow-indigo-100/30");
+        });
+
+        dropzone.addEventListener("dragleave", () => {
+          dropzone.classList.remove("border-indigo-400", "bg-indigo-50/10", "shadow-lg", "shadow-indigo-100/30");
+          dropzone.classList.add("border-slate-300", "bg-slate-50/30");
+        });
+
+        dropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("border-indigo-400", "bg-indigo-50/10", "shadow-lg", "shadow-indigo-100/30");
+          dropzone.classList.add("border-slate-300", "bg-slate-50/30");
+          
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileName();
+          }
+        });
+
+        fileInput.addEventListener("change", updateFileName);
+      }
+
+      function updateFileName() {
+        if (fileInput.files && fileInput.files.length > 0) {
+          fileNameText.textContent = fileInput.files[0].name;
+          selectedFileName.classList.remove("hidden");
+          if (window.lucide) {
+            window.lucide.createIcons();
+          }
+        } else {
+          selectedFileName.classList.add("hidden");
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

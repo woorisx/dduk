@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - AI 챗봇 테스트</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../styles/admin/admin-pages.css">
+  <style>
+    /* 챗 영역의 스크롤바 디자인 및 높이 조절 */
+    #chatMessages {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(99, 102, 241, 0.2) transparent;
+    }
+    #chatMessages::-webkit-scrollbar {
+      width: 6px;
+    }
+    #chatMessages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #chatMessages::-webkit-scrollbar-thumb {
+      background-color: rgba(99, 102, 241, 0.2);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body class="w-full">
+  <aside data-dduk-sidebar></aside>
+  
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="flex-1 px-4">
+        <h2 class="text-lg font-semibold text-gray-800">AI 검증 도구</h2>
+      </div>
+    </header>
+
+    <main class="content_area p-6 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">AI 챗봇 테스트 환경</h2>
+          <p class="text-gray-500 mt-1">백엔드 AI 프록시(<code>/api/v1/ai/chat</code>) 및 Flask AI 서버의 연동과 답변 품질을 검증합니다.</p>
+        </div>
+        <div>
+          <button type="button" id="clearChatButton" class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors shadow-sm bg-white">
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i>
+            대화 초기화
+          </button>
+        </div>
+      </div>
+
+      <!-- 에러 알림 바 -->
+      <div id="chatError" class="hidden p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-3 shadow-sm animate-pulse">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+        <div>
+          <span class="font-bold">연동 오류 발생:</span>
+          <span id="chatErrorText">서버와의 연결이 실패했습니다.</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- 좌측 정보 패널 (점검용 메타데이터) -->
+        <section class="lg:col-span-1 space-y-4">
+          <div class="section_card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <i data-lucide="cpu" class="text-indigo-600 w-5 h-5"></i>
+              <h3 class="text-base font-semibold text-gray-800">연동 정보</h3>
+            </div>
+            <div class="space-y-3 text-xs text-gray-600">
+              <div class="flex justify-between py-1.5 border-b border-gray-50">
+                <span class="font-medium text-gray-400">요청 경로</span>
+                <span class="font-mono text-gray-800 bg-gray-50 px-1.5 py-0.5 rounded">/api/v1/ai/chat</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-50">
+                <span class="font-medium text-gray-400">AI 모델</span>
+                <span class="font-mono text-gray-800 bg-gray-50 px-1.5 py-0.5 rounded">Gemini (Auto)</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-50">
+                <span class="font-medium text-gray-400">인증 방식</span>
+                <span class="text-gray-800 font-semibold text-green-600 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-ping"></span>
+                  JWT Bearer Token
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section_card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <i data-lucide="info" class="text-indigo-600 w-5 h-5"></i>
+              <h3 class="text-base font-semibold text-gray-800">테스트 안내</h3>
+            </div>
+            <ul class="text-xs text-gray-500 space-y-2 list-disc list-inside">
+              <li>Flask AI 서버가 백엔드와 로컬망으로 연결되어 있어야 통신이 가능합니다.</li>
+              <li>본 화면은 대화 세션 유지를 위해 클라이언트 메모리에 <code>history</code>를 적재해 전송합니다.</li>
+              <li>도메인 맥락(인사, 재고 등)을 포함하여 한국어로 테스트를 진행해 보십시오.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 우측 챗 영역 -->
+        <section class="lg:col-span-3">
+          <div class="section_card p-0 bg-white border border-gray-100 rounded-2xl shadow-sm flex flex-col min-h-[550px] max-h-[650px] overflow-hidden">
+            <!-- 챗 헤더 -->
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                <span class="font-semibold text-gray-800 text-sm">DDUK AI Agent Chatbot</span>
+              </div>
+              <span class="text-xs text-gray-400">실시간 연동 테스트</span>
+            </div>
+
+            <!-- 메시지 출력창 -->
+            <div id="chatMessages" class="flex-1 p-5 overflow-y-auto bg-white space-y-4">
+              <!-- JS에서 대화 생성 -->
+            </div>
+
+            <!-- 입력창 폼 -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50/30">
+              <form id="chatForm" class="flex items-center gap-3">
+                <input type="text" id="chatInput" placeholder="AI에게 질문할 내용을 입력하세요..." class="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none bg-white transition-all shadow-inner" autocomplete="off">
+                <button type="submit" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-md transition-colors hover:shadow-lg">
+                  <span>전송</span>
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../services/common/session.js"></script>
+  <script src="../../services/common/app-shell.js"></script>
+  <script src="../../services/common/sidebar.js"></script>
+  <script src="../../services/admin/chatbot.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.lucide) lucide.createIcons();
+      window.ddukAppShell.hydratePage({
+        title: "AI 챗봇 테스트",
+        description: "AI 응답과 에러 흐름을 빠르게 검증하는 최소 운영/테스트 화면입니다."
+      });
+    });
+  </script>
+</body>
+
+</html>

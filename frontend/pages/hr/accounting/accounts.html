@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 계정과목 관리</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <link rel="stylesheet" href="../../../styles/hr/accounts.css">
+  <style>
+    .erp_table_container { position: relative; max-height: 600px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); }
+    .erp_table th { position: sticky; top: 0; background: #f1f5f9; z-index: 10; box-shadow: inset 0 -1px 0 var(--border); }
+    .table-loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 20; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-secondary); text-align: center; }
+    .kpi_card { background: var(--card-bg); border-radius: 12px; padding: 20px 24px; border: 1px solid var(--border); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+    .kpi_card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(79,70,229,0.08); border-color: var(--accent); }
+    .kpi_card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+    .kpi_card:hover::after { opacity: 1; }
+  </style>
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i> 
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button> 
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area hr_page">
+      <section class="page_header">
+        <div class="page_title_area">
+          <h2>계정과목 관리</h2>
+          <p>ERP 회계 엔진의 중심 마스터 데이터 기준 관리 체계</p>
+        </div>
+        <div class="header_actions">
+          <button class="erp_btn erp_btn_secondary" onclick="triggerCoaSeeding()" title="표준 계정 데이터로 전체 갱신/복원합니다.">
+            <i data-lucide="rotate-ccw"></i>
+            <span>표준 계정 초기화/복원</span>
+          </button>
+          <button class="erp_btn erp_btn_primary" onclick="openCreateModal()" title="새 계정과목 등록">
+            <i data-lucide="plus"></i>
+            <span>계정과목 추가</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- KPI Summary Cards -->
+      <section class="kpi_grid">
+        <div class="kpi_card">
+          <div class="kpi_icon blue">
+            <i data-lucide="list"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">총 계정과목 수</div>
+            <div class="kpi_value" id="kpi_total_count">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_icon green">
+            <i data-lucide="file-check-2"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">기표 가능 (말단) 계정</div>
+            <div class="kpi_value" id="kpi_posting_count">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_icon orange">
+            <i data-lucide="shield-check"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">시스템 필수 보호 계정</div>
+            <div class="kpi_value" id="kpi_system_count">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_icon red">
+            <i data-lucide="slash"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">비활성화 계정</div>
+            <div class="kpi_value" id="kpi_inactive_count">0</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search & Filters -->
+      <section class="segmented_tabs">
+        <button class="segmented_tab active" onclick="filterByType('ALL')">전체 계정</button>
+        <button class="segmented_tab" onclick="filterByType('ASSET')">자산 (Asset)</button>
+        <button class="segmented_tab" onclick="filterByType('LIABILITY')">부채 (Liability)</button>
+        <button class="segmented_tab" onclick="filterByType('EQUITY')">자본 (Equity)</button>
+        <button class="segmented_tab" onclick="filterByType('REVENUE')">수익 (Revenue)</button>
+        <button class="segmented_tab" onclick="filterByType('EXPENSE')">비용 (Expense)</button>
+      </section>
+
+      <!-- CoA Tree Table Card -->
+      <section class="section_card">
+        <div class="section_card_header">
+          <h3>계정과목 트리 테이블</h3>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <input type="text" id="coa_search_input" class="erp_input" placeholder="코드 또는 계정과목명 검색..." style="width: 260px;">
+          </div>
+        </div>
+
+        <div class="erp_table_container">
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">계정코드</th>
+                <th>계정과목명 (트리 계층)</th>
+                <th style="width: 180px;">영문 계정명</th>
+                <th style="width: 90px;">계정유형</th>
+                <th style="width: 90px;">차대방향</th>
+                <th style="width: 80px; text-align: center;">정렬순서</th>
+                <th style="width: 90px;">전표기표</th>
+                <th style="width: 100px;">시스템계정</th>
+                <th style="width: 80px;">상태</th>
+                <th style="width: 100px; text-align: center;">작업</th>
+              </tr>
+            </thead>
+            <tbody id="coa_tree_tbody">
+              <!-- Dynamically populated rows by accounts.js -->
+              <tr>
+                <td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <i data-lucide="loader-2" class="animate-spin" style="width: 24px; height: 24px;"></i>
+                    <span>계정과목 데이터를 로딩 중입니다...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Create/Edit Modal Dialog -->
+  <div id="account_modal" class="erp_modal_overlay">
+    <div class="erp_modal">
+      <div class="erp_modal_header">
+        <h3 id="modal_title">계정과목 등록</h3>
+        <button class="erp_modal_close" onclick="closeAccountModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      
+      <form id="account_form">
+        <input type="hidden" id="form_account_id">
+        <div class="erp_modal_body">
+          
+          <!-- System Account Warning Banner -->
+          <div class="status_badge danger coa-row-hidden" id="system_account_alert" style="width: 100%; padding: 12px; border-radius: 8px; margin-bottom: 16px; align-items: flex-start; gap: 8px; line-height: 1.4; display: flex; font-size: 0.8125rem;">
+            <i data-lucide="alert-triangle" style="flex-shrink: 0; margin-top: 2px;"></i>
+            <div>
+              <strong>시스템 보호 계정 제한 안내</strong>
+              <p style="margin-top: 4px;">이 계정과목은 ERP 회계 엔진에 직결된 보호 계정입니다. 계정과목명, 영문명, 설명, 정렬순서 외의 핵심 속성(코드, 부모 계정, 기표 여부, 상태)은 수정할 수 없습니다.</p>
+            </div>
+          </div>
+
+          <div class="form_grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+            
+            <!-- Account Code -->
+            <div class="erp_form_group">
+              <label class="erp_label" for="form_code">계정코드 <span style="color: var(--danger)">*</span></label>
+              <input type="text" id="form_code" class="erp_input" required max="20" placeholder="예: 1111 (숫자/문자 20자 이내)">
+            </div>
+
+            <!-- Account Type -->
+            <div class="erp_form_group">
+              <label class="erp_label" for="form_type">계정유형 <span style="color: var(--danger)">*</span></label>
+              <select id="form_type" class="erp_select" required onchange="handleTypeChange()">
+                <option value="ASSET">자산 (ASSET)</option>
+                <option value="LIABILITY">부채 (LIABILITY)</option>
+                <option value="EQUITY">자본 (EQUITY)</option>
+                <option value="REVENUE">수익 (REVENUE)</option>
+                <option value="EXPENSE">비용 (EXPENSE)</option>
+              </select>
+            </div>
+
+            <!-- Account Name -->
+            <div class="erp_form_group">
+              <label class="erp_label" for="form_name">계정과목명 <span style="color: var(--danger)">*</span></label>
+              <input type="text" id="form_name" class="erp_input" required max="100" placeholder="예: 보통예금">
+            </div>
+
+            <!-- English Name -->
+            <div class="erp_form_group">
+              <label class="erp_label" for="form_english_name">영문 계정명</label>
+              <input type="text" id="form_english_name" class="erp_input" max="100" placeholder="예: Ordinary Deposits">
+            </div>
+
+            <!-- Normal Balance Direction -->
+            <div class="erp_form_group">
+              <label class="erp_label" for="form_balance">정상 차대방향 <span style="color: var(--danger)">*</span></label>
+              <select id="form_balance" class="erp_select" required>
+                <option value="DEBIT">차변 (DEBIT)</option>
+                <option value="CREDIT">대변 (CREDIT)</option>
+              </select>
+            </div>
+
+            <!-- Sort Order -->
+            <div class="erp_form_group">
+              <label class="erp_label" for="form_sort_order">정렬 순서</label>
+              <input type="number" id="form_sort_order" class="erp_input" value="0" min="0">
+            </div>
+
+            <!-- Parent Account Select -->
+            <div class="erp_form_group form_full" style="grid-column: span 2;">
+              <label class="erp_label" for="form_parent_id">상위 부모 계정</label>
+              <select id="form_parent_id" class="erp_select">
+                <option value="">(최상위 루트 계정으로 등록)</option>
+                <!-- Populated dynamically with indented option list -->
+              </select>
+            </div>
+
+            <!-- Description -->
+            <div class="erp_form_group form_full" style="grid-column: span 2;">
+              <label class="erp_label" for="form_description">설명</label>
+              <input type="text" id="form_description" class="erp_input" placeholder="계정과목 용도 및 회계처리 기준 설명">
+            </div>
+
+            <!-- Controls (Allow Posting / Status ACTIVE-INACTIVE) -->
+            <div class="erp_form_group form_full" style="grid-column: span 2; flex-direction: row; gap: 24px; margin-top: 8px; display: flex; align-items: center;">
+              <label class="erp_checkbox_label">
+                <input type="checkbox" id="form_allow_posting" class="erp_checkbox" checked>
+                <span>전표 기표(Posting) 허용</span>
+              </label>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label class="erp_label" for="form_status" style="margin-bottom: 0; white-space: nowrap;">상태:</label>
+                <select id="form_status" class="erp_select" style="padding: 6px 12px; width: 140px;">
+                  <option value="ACTIVE">활성 (ACTIVE)</option>
+                  <option value="INACTIVE">비활성 (INACTIVE)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        
+        <div class="erp_modal_footer">
+          <button type="button" class="erp_btn erp_btn_secondary" onclick="closeAccountModal()">취소</button>
+          <button type="submit" class="erp_btn erp_btn_primary" id="btn_modal_submit">등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast_container" style="position: fixed; right: 24px; bottom: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+  <!-- Common Scripts -->
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  
+  <!-- Page Custom Scripts -->
+  <script src="accounts.js"></script>
+</body>
+
+</html>

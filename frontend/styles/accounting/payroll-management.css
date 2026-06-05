@@ -1,0 +1,116 @@
+/* ============================================================
+   payroll-management.css
+   급여 관리 페이지 전용 스타일
+   - erp_components.css 의 erp_dialog, erp_form_grid 공용
+   - 이 파일: 급여 옵션 패널, 체크 그리드, 상태 배지 변형
+   ============================================================ */
+
+/* 급여 옵션 패널 */
+.payroll_option_panel {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.payroll_option_head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.payroll_option_head strong {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* 정산 항목 체크 그리드 */
+.payroll_check_grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.payroll_check_grid .erp_checkbox_label {
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fafafa;
+}
+
+/* 대상사원 */
+.payroll_employee_row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.payroll_selected_employees {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payroll_employee_chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  background: #f1f5f9;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* 급여 상태 배지 변형 */
+.status_badge.calculated {
+  background-color: rgba(16, 185, 129, 0.08);
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.status_badge.confirmed {
+  background-color: rgba(99, 102, 241, 0.08);
+  color: var(--accent);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.status_badge.cancelled {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.status_badge.draft {
+  background-color: rgba(148, 163, 184, 0.08);
+  color: var(--text-secondary);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* segmented 라디오 내 폼 사용 */
+.payroll_option_panel .segmented_tabs {
+  margin-bottom: 0;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .payroll_check_grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .payroll_check_grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .payroll_option_head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

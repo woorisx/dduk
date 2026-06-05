@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입고 등록 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:700;color:#374151}
+        .form-input{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .data-table{width:100%;border-collapse:separate;border-spacing:0}
+        .data-table th{background:#f9fafb;padding:.75rem;text-align:left;font-size:.75rem;font-weight:800;color:#6b7280;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+        .data-table td{padding:.875rem .75rem;font-size:.875rem;color:#374151;border-bottom:1px solid #f3f4f6;vertical-align:top}
+        .status-badge{display:inline-flex;align-items:center;border-radius:999px;padding:.25rem .625rem;font-size:.75rem;font-weight:800;background:#eef2ff;color:#4338ca}
+        .action-cell{white-space:nowrap}
+        .select-order{display:inline-flex;align-items:center;justify-content:center;min-width:3.25rem;white-space:nowrap}
+        .select-order:disabled{cursor:not-allowed;background:#f3f4f6;color:#9ca3af}
+        .rv-pagination{display:flex;align-items:center;justify-content:center;gap:.375rem;padding:1rem;flex-wrap:wrap}
+        .rv-btn{min-width:2.25rem;height:2.25rem;display:inline-flex;align-items:center;justify-content:center;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;font-size:.8125rem;font-weight:700;color:#374151;cursor:pointer;transition:all .15s}
+        .rv-btn:hover:not(:disabled):not(.active){background:#f3f4f6}
+        .rv-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
+        .rv-btn:disabled{cursor:not-allowed;opacity:.4}
+        .rv-btn.nav{padding:0 .625rem;font-weight:800}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">입고 등록</h1>
+                    <p id="message" class="text-sm text-gray-500 mt-1">데이터를 불러오는 중입니다...</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="content_area p-6 max-w-7xl mx-auto">
+            <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-6">
+                <form id="search-form" class="p-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+                    <label>
+                        <span class="form-label">발주 검색</span>
+                        <input id="keyword" class="form-input" placeholder="발주번호, 거래처명, 요청자명 또는 요청자 ID를 입력하세요" autocomplete="off">
+                    </label>
+                    <button type="submit" class="h-11 px-5 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4"></i> 검색
+                    </button>
+                </form>
+            </section>
+
+            <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,.9fr)] gap-6">
+                <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100">
+                        <h2 class="text-base font-bold text-gray-800">입고 전 발주</h2>
+                        <p class="text-sm text-gray-500 mt-1">이미 입고 완료, 발주완료, 취소된 발주는 제외됩니다.</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>발주번호</th>
+                                    <th>거래처</th>
+                                    <th>요청자 / 승인자</th>
+                                    <th>금액</th>
+                                    <th>선택</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-body">
+                                <tr><td colspan="5" class="text-center text-gray-400 font-semibold py-8">데이터를 불러오는 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="orders-pagination" class="rv-pagination"></div>
+                </section>
+
+                <section class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100 flex items-start justify-between gap-3">
+                        <div>
+                            <h2 class="text-base font-bold text-gray-800">입고 품목</h2>
+                            <p id="selected-order" class="text-sm text-gray-500 mt-1">선택된 발주서가 없습니다.</p>
+                        </div>
+                        <div class="flex flex-wrap justify-end gap-2">
+                            <button type="button" id="btn-cancel" class="px-4 py-2 text-sm font-bold rounded-lg border border-red-200 bg-white text-red-700 hover:bg-red-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                                <i data-lucide="ban" class="w-4 h-4"></i> 취소
+                            </button>
+                            <button type="button" id="btn-receive" class="px-4 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                                <i data-lucide="package-check" class="w-4 h-4"></i> 입고 등록
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>품목</th>
+                                    <th>수량</th>
+                                    <th>단가</th>
+                                    <th>금액</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-body">
+                                <tr><td colspan="4" class="text-center text-gray-400 font-semibold py-8">발주서를 선택하세요.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-receiving-page.js"></script>
+    
+
+</body>
+</html>

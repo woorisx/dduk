@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>재고 현황 조회 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .stock_table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .stock_table th { background: #f9fafb; padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; }
+        .stock_table td { padding: 1rem; font-size: 0.875rem; color: #374151; border-bottom: 1px solid #f3f4f6; }
+        .low_stock { background: #fff1f2; }
+        .status_badge { padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 500; }
+        .status_normal { background: #ecfdf5; color: #059669; }
+        .status_warning { background: #fffbeb; color: #d97706; }
+        .status_danger { background: #fef2f2; color: #dc2626; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b">
+            <div class="flex items-center gap-4">
+                <button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+                <h1 class="text-xl font-bold text-gray-800">재고 현황 조회</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex gap-2">
+                    <input id="search-input" type="text" placeholder="품목명 또는 코드 검색..." class="p-2 border rounded-lg text-sm w-64 bg-white">
+                    <select id="warehouse-filter" class="p-2 border rounded-lg text-sm bg-white">
+                        <option value="">모든 창고</option>
+                    </select>
+                    <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                        <input type="checkbox" id="low-stock-only" class="w-4 h-4 rounded text-indigo-600">
+                        부족 재고만
+                    </label>
+                </div>
+            </div>
+        </header>
+
+        <main class="content_area p-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <table class="stock_table">
+                    <thead>
+                        <tr>
+                            <th>품목 정보</th>
+                            <th>창고</th>
+                            <th>현재고 / 가용</th>
+                            <th>안전재고</th>
+                            <th>규격</th>
+                            <th>공급처</th>
+                            <th>창고 위치</th>
+                            <th>LOT 번호</th>
+                            <th>평균단가 / 가치</th>
+                            <th>상태</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-list">
+                        <!-- Data rows -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-service.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/inventory/inventory-list-page.js"></script>
+    
+
+</body>
+</html>

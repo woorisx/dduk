@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구매 요청 | DDUK ERP</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="../../styles/common/dashboard.css">
+    <style>
+        .form-label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:#374151}
+        .form-input,.form-select,.form-textarea{width:100%;border:1px solid #d1d5db;border-radius:.5rem;padding:.75rem 1rem;font-size:.875rem;color:#111827;background:#fff}
+        .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .form-textarea{min-height:96px;resize:vertical}
+        .data-table{width:100%;border-collapse:separate;border-spacing:0}.data-table th{background:#f9fafb;padding:.75rem;text-align:left;font-size:.75rem;font-weight:700;color:#6b7280;border-bottom:1px solid #e5e7eb}.data-table td{padding:.75rem;font-size:.875rem;color:#374151;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+        .data-table .whitespace-nowrap{white-space:nowrap}
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <aside data-dduk-sidebar></aside>
+    <div class="main_wrap">
+        <header class="topbar px-6 py-4 flex justify-between items-center bg-white border-b sticky top-0 z-10">
+            <div class="flex items-center gap-4"><button id="mobile_menu_btn" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button><h1 class="text-xl font-bold text-gray-800">구매 요청</h1></div>
+            <button type="button" id="btn-save" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> 구매 요청 저장</button>
+        </header>
+        <main class="content_area p-6 max-w-7xl mx-auto">
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+                <div class="p-6 border-b border-gray-100"><h2 class="text-lg font-semibold text-gray-800">발주 기본 정보</h2><p class="text-sm text-gray-500 mt-1">거래처와 납기일을 지정한 뒤 발주 품목을 추가합니다.</p></div>
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-[160px_220px_220px_minmax(0,1fr)] gap-5">
+                    <label><span class="form-label">요청자 ID</span><input id="requested-by-member-id" class="form-input" readonly></label>
+                    <label><span class="form-label">희망 납기일</span><input id="expected-date" type="date" class="form-input" required></label>
+                    <label><span class="form-label">승인자</span><select id="approved-by-member-id" class="form-select" required></select></label>
+                    <label class="lg:col-span-4"><span class="form-label">요청 메모</span><textarea id="order-note" class="form-textarea"></textarea></label>
+                </div>
+            </section>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"><div class="p-6 border-b border-gray-100"><h2 class="text-lg font-semibold text-gray-800">거래처 검색</h2><div class="flex gap-2 mt-4"><input id="vendor-name" class="form-input" placeholder="거래처명을 입력하세요"><button id="btn-vendor-search" type="button" class="shrink-0 px-4 rounded-lg bg-gray-900 text-sm font-semibold text-white">검색</button></div><input id="vendor-id" type="hidden"></div><div class="overflow-x-auto"><table class="data-table"><thead><tr><th>거래처 코드</th><th>거래처명</th><th>대표자명</th><th>전화번호</th><th>선택</th></tr></thead><tbody id="vendor-result"><tr><td colspan="5" class="text-center text-gray-400 font-semibold py-7">거래처명을 검색하세요.</td></tr></tbody></table></div></section>
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"><div class="p-6 border-b border-gray-100"><h2 class="text-lg font-semibold text-gray-800">품목 검색</h2><div class="flex gap-2 mt-4"><input id="item-name" class="form-input" placeholder="품목명을 입력하세요"><button id="btn-item-search" type="button" class="shrink-0 px-4 rounded-lg bg-gray-900 text-sm font-semibold text-white">검색</button></div></div><div class="overflow-x-auto"><table class="data-table"><thead><tr><th class="whitespace-nowrap">품목 코드</th><th class="whitespace-nowrap">품목명</th><th class="whitespace-nowrap">단위</th><th class="whitespace-nowrap">단가</th><th class="whitespace-nowrap">추가</th></tr></thead><tbody id="item-result"><tr><td colspan="5" class="text-center text-gray-400 font-semibold py-7">품목명을 검색하세요.</td></tr></tbody></table></div></section>
+            </div>
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"><div class="p-6 border-b border-gray-100"><h2 class="text-lg font-semibold text-gray-800">발주 품목</h2><p id="message" class="text-sm text-gray-500 mt-1">품목을 추가하면 발주 요청을 저장할 수 있습니다.</p></div><div class="overflow-x-auto"><table class="data-table"><thead><tr><th>품목</th><th>수량</th><th>단가</th><th>공급가액</th><th>부가세</th><th>합계</th><th>삭제</th></tr></thead><tbody id="order-items"><tr><td colspan="7" class="text-center text-gray-400 font-semibold py-8">추가된 품목이 없습니다.</td></tr></tbody></table></div></section>
+        </main>
+    </div>
+    <script src="../../services/common/session.js"></script>
+    <script src="../../services/common/sidebar.js"></script>
+    <script src="../../services/common/apiClient.js"></script>
+    <script src="../../services/inventory/inventory-purchase-request-page.js?v=20260604"></script>
+    
+
+</body>
+</html>

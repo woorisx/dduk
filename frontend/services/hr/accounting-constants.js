@@ -1,0 +1,51 @@
+/**
+ * Accounting Management Constants
+ */
+
+export const TRANSACTION_TYPE = {
+    PURCHASE: "PURCHASE",
+    SALES: "SALES"
+};
+
+export const TRANSACTION_TYPE_LABEL = {
+    [TRANSACTION_TYPE.PURCHASE]: "매입",
+    [TRANSACTION_TYPE.SALES]: "매출"
+};
+
+export const TRANSACTION_STATUS = {
+    COMPLETED: "COMPLETED",
+    PENDING: "PENDING",
+    CANCELED: "CANCELED"
+};
+
+export const TRANSACTION_STATUS_LABEL = {
+    [TRANSACTION_STATUS.COMPLETED]: "완료",
+    [TRANSACTION_STATUS.PENDING]: "대기",
+    [TRANSACTION_STATUS.CANCELED]: "취소"
+};
+
+export const APPROVAL_STATUS = {
+    DRAFT: "DRAFT",
+    REQUESTED: "REQUESTED",
+    APPROVED: "APPROVED",
+    REJECTED: "REJECTED"
+};
+
+export const APPROVAL_STATUS_LABEL = {
+    [APPROVAL_STATUS.DRAFT]: "초안",
+    [APPROVAL_STATUS.REQUESTED]: "결재요청",
+    [APPROVAL_STATUS.APPROVED]: "승인",
+    [APPROVAL_STATUS.REJECTED]: "반려"
+};
+
+export const PAYMENT_METHOD = {
+    CASH: "CASH",
+    CARD: "CARD",
+    TRANSFER: "TRANSFER"
+};
+
+export const PAYMENT_METHOD_LABEL = {
+    [PAYMENT_METHOD.CASH]: "현금",
+    [PAYMENT_METHOD.CARD]: "카드",
+    [PAYMENT_METHOD.TRANSFER]: "계좌이체"
+};

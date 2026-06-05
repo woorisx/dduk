@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 회계 대시보드</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <link rel="stylesheet" href="../../../styles/accounting/accounting-dashboard.css">
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area accounting_dashboard">
+      <section class="page_header mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="page_title_area">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900">회계 대시보드</h2>
+          <p class="text-sm text-slate-500 mt-1">전표 기표 현황, 원장 지출, 시산 검증, 월 마감 현황 및 자금 흐름을 실시간으로 통합 모니터링합니다.</p>
+        </div>
+        <div class="header_actions">
+          <div class="period_controls flex gap-2">
+            <input id="filterYear" type="number" min="2000" max="2100" class="erp_input p-2 border border-slate-200 rounded-lg text-sm filter_year_input" aria-label="회계연도">
+            <select id="filterMonth" class="erp_select p-2 border border-slate-200 rounded-lg text-sm filter_month_select" aria-label="회계월"></select>
+            <button id="reloadButton" class="erp_btn erp_btn_secondary erp_btn_icon p-2 border border-slate-200 hover:bg-slate-50 rounded-lg transition" type="button" aria-label="새로고침"><i data-lucide="refresh-cw" class="w-4 h-4 text-slate-600"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="kpi_grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-4 mb-6" id="kpiGrid"></section>
+
+      <section class="dashboard_grid grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Row 1: 월별 손익 추이 (col-span-2) & 자산/부채/자본 (col-span-1) -->
+        <article class="dashboard_panel row-1-card md:col-span-2">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4 flex justify-between items-center">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">월별 손익 추이</h3>
+              <span class="text-xs text-slate-400">최근 6개월 손익분기 분석 차트</span>
+            </div>
+          </div>
+          <div class="chart_box"><canvas id="profitLossChart"></canvas></div>
+        </article>
+
+        <article class="dashboard_panel row-1-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">자산 / 부채 / 자본</h3>
+              <span class="text-xs text-slate-400">계정 유형 구성 비율</span>
+            </div>
+          </div>
+          <div class="chart_box compact"><canvas id="compositionChart"></canvas></div>
+          <div class="composition_legend flex justify-around text-xs mt-2 border-t border-slate-100 pt-2" id="compositionLegend"></div>
+        </article>
+
+        <!-- Row 2: 전표 진행 상태 (col-span-1) & 자금 흐름 요약 (col-span-1) & 급여 지급 현황 (col-span-1) -->
+        <article class="dashboard_panel row-2-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">전표 진행 상태</h3>
+              <span class="text-xs text-slate-400">당월 유형별 전표 결재 수치</span>
+            </div>
+          </div>
+          <div class="voucher_status_grid flex flex-col gap-2" id="voucherStatusGrid"></div>
+        </article>
+
+        <article class="dashboard_panel row-2-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">자금 흐름 요약</h3>
+              <span id="cashFlowBasis" class="text-xs text-slate-400">-</span>
+            </div>
+          </div>
+          <div class="metric_list flex flex-col gap-2 text-sm text-slate-600" id="cashFlowList"></div>
+        </article>
+
+        <article class="dashboard_panel row-2-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">급여 지급 현황</h3>
+              <span class="text-xs text-slate-400">당월 급여대장 집계 결과</span>
+            </div>
+          </div>
+          <div class="metric_list flex flex-col gap-2 text-sm text-slate-600" id="payrollList"></div>
+        </article>
+
+        <!-- Row 3: 회계 마감 현황 (col-span-1) & 시산 검증 요약 (col-span-1) & 빠른 실행 (col-span-1) -->
+        <article class="dashboard_panel row-3-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">회계 마감 현황</h3>
+              <span class="text-xs text-slate-400">당기 마감 기간 정책 검증</span>
+            </div>
+          </div>
+          <div class="metric_list flex flex-col gap-2 text-sm text-slate-600" id="periodList"></div>
+        </article>
+
+        <article class="dashboard_panel row-3-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">시산 검증 요약</h3>
+              <span class="text-xs text-slate-400">차대 일치 상태 및 주요 과목 잔액</span>
+            </div>
+          </div>
+          <div class="metric_list flex flex-col gap-2 text-sm text-slate-600 mb-4" id="trialBalanceList"></div>
+          <div class="account_rank border-t border-slate-100 pt-3 flex flex-col gap-2 text-xs" id="majorAccounts"></div>
+        </article>
+
+        <article class="dashboard_panel row-3-card">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">빠른 실행</h3>
+              <span class="text-xs text-slate-400">회계 주요 업무 바로가기</span>
+            </div>
+          </div>
+          <div class="quick_actions flex flex-wrap gap-2 text-xs" id="quickActions"></div>
+        </article>
+
+        <!-- Row 4: 최근 회계 활동 (col-span-3) -->
+        <article class="dashboard_panel row-4-card md:col-span-3">
+          <div class="panel_head border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">최근 회계 활동</h3>
+              <span class="text-xs text-slate-400">전표, 마감, 분개 이력 로그</span>
+            </div>
+          </div>
+          <div class="activity_table overflow-x-auto text-xs text-slate-600">
+            <div class="activity_row head bg-slate-50 p-2 font-semibold text-slate-700 flex justify-between border-b border-slate-200">
+              <span class="w-1/5">작업유형</span><span class="w-1/5">대상</span><span class="w-1/5">작업자</span><span class="w-1/5">작업일시</span><span class="w-1/5">상태</span>
+            </div>
+            <div id="activityRows" class="flex flex-col gap-1 mt-2"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/accounting_dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+/* ============================================================
+   monthly-closing.css
+   월 마감 페이지 전용 스타일
+   - erp_components.css 의 erp_dialog, erp_form_grid 공용
+   - 이 파일: 2분할 레이아웃, 타임라인 액션, 상태 배지 변형
+   ============================================================ */
+
+/* 2분할 레이아웃 -> 1열 직렬화 */
+.closing_layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.closing_timeline_card {
+  position: static;
+}
+
+/* 마감 통합 대시보드 카드 */
+.closing_kpi_dashboard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.closing_kpi_grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.kpi_item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.closing_kpi_grid .kpi_item:not(:last-child) {
+  border-right: 1px solid rgba(226, 232, 240, 0.8);
+  padding-right: 20px;
+}
+
+.kpi_item_label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi_item_value {
+  color: var(--text-primary);
+}
+
+/* 마감 사전 체크리스트 */
+.closing_checklist_box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checklist_items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .checklist_items {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checklist_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.checklist_item:hover {
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+.checklist_name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.status-pill.status-SUCCESS {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--success);
+}
+
+.status-pill.status-ERROR,
+.status-pill.status-DANGER {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+}
+
+.status-pill.status-WARNING {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--warning);
+}
+
+.status-pill.status-PENDING {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-muted);
+}
+
+/* 월마감 프로세스 단계 (STEP 1 ~ STEP 5) */
+.closing_steps_container {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.closing_steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 320px;
+}
+
+.step_node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.step_num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step_name {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 6px;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.step_line {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 4px;
+  position: relative;
+  top: -12px;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 스텝 상태 스타일 */
+.step_node.active .step_num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.step_node.active .step_name {
+  color: var(--accent);
+}
+
+.step_node.completed .step_num {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.step_node.completed .step_name {
+  color: var(--text-primary);
+}
+
+.step_line.completed {
+  background: var(--success);
+}
+
+/* 마감 불가 경고 카드 */
+.alert_card {
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.alert_card.danger {
+  background: #fef2f2;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.alert_card.hidden {
+  display: none !important;
+}
+
+/* 마감 액션 버튼 그룹 */
+.closing_action_group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  justify-content: flex-end;
+}
+
+.closing_action_group .erp_btn {
+  width: auto;
+  min-width: 120px;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .closing_action_group {
+    justify-content: stretch;
+  }
+  .closing_action_group .erp_btn {
+    width: 100%;
+  }
+}
+
+/* 상태 배지 변형 (마감 전용) */
+.status_badge.closed {
+  background-color: rgba(99, 102, 241, 0.08);
+  color: var(--accent);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.status_badge.pre_closing {
+  background-color: rgba(245, 158, 11, 0.08);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.status_badge.reopened {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* 반응형 */
+@media (max-width: 1280px) {
+  .closing_kpi_grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .closing_kpi_grid .kpi_item:nth-child(3) {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .closing_layout {
+    grid-template-columns: 1fr;
+  }
+  .closing_timeline_card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .closing_kpi_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .closing_kpi_grid .kpi_item:nth-child(2n) {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .closing_kpi_grid {
+    grid-template-columns: 1fr;
+  }
+  .closing_kpi_grid .kpi_item {
+    border-right: none !important;
+    padding-right: 0 !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    padding-bottom: 12px;
+  }
+  .closing_kpi_grid .kpi_item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}

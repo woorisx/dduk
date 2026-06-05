@@ -1,0 +1,706 @@
+.tax_invoice_page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.tax_invoice_toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  background: #fff;
+  padding: 20px 24px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.tax_invoice_toolbar + .tax_invoice_list_panel {
+  margin-top: -12px;
+}
+
+.toolbar_hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.filter_group {
+  display: grid;
+  grid-template-columns: minmax(120px, 150px) minmax(140px, 180px) minmax(220px, 320px);
+  gap: 10px;
+}
+
+.tax_invoice_grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.tax_invoice_form,
+.tax_invoice_list_panel,
+.status_dialog,
+.detail_dialog {
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.tax_invoice_list_panel.is_collapsed {
+  display: none;
+}
+
+.section_head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -24px -24px 20px;
+  padding: 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.section_head h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.section_head span {
+  display: block;
+  margin-top: 3px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form_grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.form_full {
+  grid-column: 1 / -1;
+}
+
+.party_grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.party_panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fafafa;
+  padding: 18px;
+}
+
+.party_panel_head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.party_panel_head h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.party_panel_head span {
+  display: block;
+  margin-top: 3px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.party_fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+#totalAmount {
+  background: #f9fafb;
+  font-weight: 700;
+}
+
+.form_actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.line_actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.line_table_wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.erp_label {
+  display: block;
+  margin-bottom: 8px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.erp_input,
+.erp_select,
+.erp_textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  font-size: 14px;
+  padding: 12px 16px;
+}
+
+.erp_select {
+  height: auto !important;
+  min-height: 44px;
+  padding-top: 11px;
+  padding-right: 42px;
+  padding-bottom: 11px;
+  padding-left: 16px;
+  color: #111827;
+  font-family: "Pretendard Variable", Pretendard, "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.45;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.erp_select option {
+  color: #111827;
+  background-color: #fff;
+}
+
+.erp_input:focus,
+.erp_select:focus,
+.erp_textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.erp_textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.erp_table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.line_table th,
+.line_table td {
+  white-space: nowrap;
+}
+
+.erp_table th {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 12px;
+  text-align: left;
+}
+
+.erp_table td {
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  font-size: 14px;
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.lookup_field {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.lookup_field .erp_input {
+  flex: 1;
+}
+
+.item_meta {
+  min-height: 18px;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.erp_btn i {
+  width: 16px;
+  height: 16px;
+}
+
+.erp_btn:disabled,
+.erp_btn.is_loading {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.erp_table_container {
+  position: relative;
+  max-height: 680px;
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.erp_table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f9fafb;
+}
+
+.pagination_bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.pagination_pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination_page {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pagination_page:hover {
+  border-color: #c7d2fe;
+  color: #4338ca;
+  background: #eef2ff;
+}
+
+.pagination_page.is_active {
+  border-color: #4f46e5;
+  background: #4f46e5;
+  color: #fff;
+}
+
+.amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.status_badge {
+  display: inline-flex;
+  align-items: center;
+  min-width: 72px;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status_badge.draft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.status_badge.pending {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.status_badge.success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status_badge.danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.status_badge.closed {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.row_actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 176px;
+}
+
+.row_actions .erp_btn {
+  min-height: 30px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.modal_overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.38);
+}
+
+.modal_overlay.is_active {
+  display: flex;
+}
+
+.status_dialog,
+.lookup_dialog,
+.detail_dialog {
+  width: min(480px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: #fff;
+  padding: 50px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+}
+
+.lookup_dialog {
+  width: min(680px, 100%);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail_dialog {
+  width: min(920px, 100%);
+}
+
+.detail_content {
+  display: grid;
+  gap: 18px;
+}
+
+.detail_summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detail_field {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.detail_field span {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.detail_field strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.detail_parties {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail_party {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.detail_party h4 {
+  margin: 0 0 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.detail_party p {
+  margin: 4px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.detail_lines {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.status_form {
+  display: grid;
+  gap: 14px;
+}
+
+.lookup_search_bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.lookup_result_head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: #f9fafb;
+}
+
+.lookup_result_head span {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.lookup_result_head .erp_btn {
+  min-height: 30px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.lookup_result_head.is_collapsed {
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.lookup_results {
+  display: grid;
+  gap: 8px;
+  margin-top: 0;
+  max-height: min(360px, 42vh);
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0 0 12px 12px;
+  background: #fff;
+  padding: 10px;
+  scroll-margin-top: 12px;
+}
+
+.lookup_results.is_collapsed {
+  display: none;
+}
+
+.lookup_results .erp_empty_state {
+  padding: 22px 12px;
+}
+
+.vendor_lookup_row,
+.item_lookup_row,
+.purchase_order_lookup_row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vendor_lookup_row:hover,
+.item_lookup_row:hover,
+.purchase_order_lookup_row:hover {
+  border-color: var(--accent);
+  background: #f8fafc;
+}
+
+.vendor_lookup_row strong,
+.item_lookup_row strong,
+.purchase_order_lookup_row strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.vendor_lookup_row small,
+.item_lookup_row small,
+.purchase_order_lookup_row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.vendor_lookup_code,
+.item_lookup_code {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.lookup_footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  max-width: min(420px, calc(100vw - 48px));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: all 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+.toast.success {
+  background: var(--success);
+}
+
+.erp_empty_state {
+  padding: 56px 24px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-weight: 700;
+}
+
+.erp_empty_state.compact {
+  padding: 24px;
+}
+
+@media (max-width: 1180px) {
+  .tax_invoice_grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+  .tax_invoice_toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter_group,
+  .form_grid,
+  .lookup_search_bar {
+    grid-template-columns: 1fr;
+  }
+
+  .party_grid {
+    grid-template-columns: 1fr;
+  }
+
+  .row_actions {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .pagination_bar {
+    align-items: stretch;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .line_actions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .status_dialog,
+  .lookup_dialog,
+  .detail_dialog {
+    padding: 28px;
+  }
+
+  .detail_summary,
+  .detail_parties {
+    grid-template-columns: 1fr;
+  }
+}

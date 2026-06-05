@@ -1,0 +1,79 @@
+/* ============================================================
+   accounting-reports.css
+   회계 분석 리포트 페이지 전용 스타일
+   - erp_components.css 기반 공통 클래스 우선 사용
+   - 차트 그리드 레이아웃 및 report_grid 정의
+   ============================================================ */
+
+/* 리포트 그리드 레이아웃 */
+.report_grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.report_panel { min-width: 0; }
+.report_panel_wide { grid-column: span 2; }
+.report_panel_full { grid-column: span 3; }
+
+/* 차트 박스 */
+.chart_box {
+  height: 280px;
+  position: relative;
+}
+
+.chart_box_compact {
+  height: 220px;
+  position: relative;
+}
+
+/* 메트릭 리스트 */
+.metric_list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.metric_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 0.8125rem;
+}
+
+.metric_row span {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.metric_row strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 인쇄 최적화 */
+@media print {
+  .topbar,
+  .sidebar,
+  .filter_section,
+  .page_actions { display: none !important; }
+  .main_wrap { margin-left: 0 !important; }
+}
+
+/* 반응형 */
+@media (max-width: 1280px) {
+  .report_grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report_panel_wide { grid-column: span 2; }
+  .report_panel_full { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+  .report_grid { grid-template-columns: 1fr; }
+  .report_panel_wide,
+  .report_panel_full { grid-column: auto; }
+}

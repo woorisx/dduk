@@ -1,0 +1,189 @@
+/* Chart of Accounts Premium Specific Styles (Underscore Version) */
+
+:root {
+    --tree-pad-unit: 20px;
+    --asset-color: #3b82f6;
+    --liability-color: #10b981;
+    --equity-color: #8b5cf6;
+    --revenue-color: #f59e0b;
+    --expense-color: #ef4444;
+}
+
+/* Tree Indentation & Controls */
+.tree-node-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tree-toggle-btn {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 4px;
+    transition: background 0.15s, transform 0.2s;
+    padding: 0;
+}
+
+.tree-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+.tree-toggle-btn.collapsed i {
+    transform: rotate(-90deg);
+}
+
+.tree-toggle-btn i {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+}
+
+.tree-indent-0 { padding-left: 0; }
+.tree-indent-1 { padding-left: calc(var(--tree-pad-unit) * 1); }
+.tree-indent-2 { padding-left: calc(var(--tree-pad-unit) * 2); }
+.tree-indent-3 { padding-left: calc(var(--tree-pad-unit) * 3); }
+.tree-indent-4 { padding-left: calc(var(--tree-pad-unit) * 4); }
+.tree-indent-5 { padding-left: calc(var(--tree-pad-unit) * 5); }
+
+.coa-row-hidden {
+    display: none !important;
+}
+
+.coa-row-visible {
+    animation: fadeInRow 0.2s ease-out;
+}
+
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Badges and tags for Chart of Accounts */
+.badge-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.badge-type.ASSET { background-color: var(--asset-color); }
+.badge-type.LIABILITY { background-color: var(--liability-color); }
+.badge-type.EQUITY { background-color: var(--equity-color); }
+.badge-type.REVENUE { background-color: var(--revenue-color); }
+.badge-type.EXPENSE { background-color: var(--expense-color); }
+
+.badge-side {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+}
+.badge-side.DEBIT {
+    background-color: rgba(59, 130, 246, 0.08);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+.badge-side.CREDIT {
+    background-color: rgba(16, 185, 129, 0.08);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.badge-status.ACTIVE {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+.badge-status.INACTIVE {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+.badge-status.LOCKED {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.badge-system {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: rgba(79, 70, 229, 0.1);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.badge-posting {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.badge-posting.allowed {
+    color: var(--success);
+}
+.badge-posting.blocked {
+    color: var(--text-muted);
+}
+
+/* Actions cell */
+.actions-cell {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.btn-icon-action {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.btn-icon-action:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: var(--accent-light);
+}
+
+.btn-icon-action.delete:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.btn-icon-action[disabled] {
+    cursor: not-allowed;
+    opacity: 0.4;
+    background: #f1f5f9 !important;
+    border-color: var(--border) !important;
+    color: var(--text-muted) !important;
+}

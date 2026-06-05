@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 급여 관리</title>
+  <meta name="description" content="귀속연월과 급여구분 기준으로 계산 진행 상태를 확인합니다.">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <link rel="stylesheet" href="../../../styles/accounting/payroll-management.css">
+  <style>
+    .erp_table_container { position: relative; max-height: 600px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); }
+    .erp_table th { position: sticky; top: 0; background: #f1f5f9; z-index: 10; box-shadow: inset 0 -1px 0 var(--border); }
+    .table-loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 20; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-secondary); text-align: center; }
+    .kpi_card { background: var(--card-bg); border-radius: 12px; padding: 20px 24px; border: 1px solid var(--border); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+    .kpi_card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(79,70,229,0.08); border-color: var(--accent); }
+    .kpi_card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+    .kpi_card:hover::after { opacity: 1; }
+  </style>
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area">
+      <section class="page_header">
+        <div class="page_title_area">
+          <h2>급여 관리</h2>
+          <p>귀속연월과 급여구분 기준으로 급여대장을 관리하고 계산을 실행합니다.</p>
+        </div>
+        <div class="page_actions">
+          <button type="button" id="openCreateButton" class="erp_btn erp_btn_primary">
+            <i data-lucide="file-plus"></i><span>급여정보 입력</span>
+          </button>
+          <button type="button" id="calculateButton" class="erp_btn erp_btn_secondary">
+            <i data-lucide="calculator"></i><span>급여계산</span>
+          </button>
+          <button type="button" id="confirmButton" class="erp_btn erp_btn_secondary">
+            <i data-lucide="check-circle"></i><span>급여확정</span>
+          </button>
+          <button type="button" id="payslipButton" class="erp_btn erp_btn_secondary">
+            <i data-lucide="receipt-text"></i><span>명세서 출력</span>
+          </button>
+          <button type="button" id="reloadButton" class="erp_btn erp_btn_icon" aria-label="새로고침">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- KPI 요약 -->
+      <section class="kpi_grid" id="summaryCards">
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">귀속연월</div>
+            <div class="kpi_value" data-summary="attributionYearMonth">-</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총 지급인원</div>
+            <div class="kpi_value" data-summary="totalEmployeeCount">0명</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총 지급 금액</div>
+            <div class="kpi_value" data-summary-money="totalGrossAmount">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총 공제 금액</div>
+            <div class="kpi_value" data-summary-money="totalDeductionAmount">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총 실지급액</div>
+            <div class="kpi_value" data-summary-money="totalNetAmount">0</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">미정산</div>
+            <div class="kpi_value" data-summary="unsettledCount">0건</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 급여대장 테이블 -->
+      <section class="section_card">
+        <div class="section_card_header">
+          <div>
+            <h3>급여대장 리스트</h3>
+            <p class="kpi_hint" style="margin-top:2px;">귀속연월과 급여구분 기준으로 계산 진행 상태를 확인합니다.</p>
+          </div>
+        </div>
+        <div class="erp_table_container">
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th>입고귀속</th>
+                <th>급여구분</th>
+                <th>대장명칭</th>
+                <th>지급일</th>
+                <th>지급연월</th>
+                <th>전산작업</th>
+                <th>급여계산</th>
+                <th class="amount">인원수</th>
+                <th>급여대장</th>
+                <th>명세서</th>
+                <th class="amount">지급총액</th>
+                <th class="amount">공제총액</th>
+                <th class="amount">실지급액</th>
+                <th>여여지급률(%)</th>
+                <th>상태</th>
+                <th>생성자</th>
+                <th>등록일시</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerTableBody"></tbody>
+          </table>
+        </div>
+        <div class="erp_empty_state" id="ledgerEmptyState" style="display:none">
+          <i data-lucide="file-x"></i>
+          <p>조회된 급여대장이 없습니다.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 급여정보 입력 다이얼로그 -->
+  <dialog id="payrollDialog">
+    <form method="dialog" class="erp_dialog erp_dialog_wide">
+      <div class="erp_dialog_header">
+        <h3>급여정보 입력</h3>
+        <button type="button" data-close-dialog="payrollDialog" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body">
+        <div class="erp_form_grid">
+          <div class="erp_form_field">
+            <label class="erp_label" for="attributionYearMonth">귀속연월</label>
+            <input id="attributionYearMonth" type="month" class="erp_input" required>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="payrollType">급여구분</label>
+            <select id="payrollType" class="erp_select" required>
+              <option value="SALARY">급여</option>
+              <option value="BONUS">상여</option>
+              <option value="INCENTIVE">성과급</option>
+              <option value="SEVERANCE">퇴직금</option>
+              <option value="OTHER_ALLOWANCE">기타수당</option>
+            </select>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="taxType">과금관련</label>
+            <select id="taxType" class="erp_select" required>
+              <option value="TAXABLE">과세</option>
+              <option value="NON_TAXABLE">비과세</option>
+              <option value="MIXED">혼합</option>
+            </select>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="settlementCycle">정산기간</label>
+            <select id="settlementCycle" class="erp_select" required>
+              <option value="MONTHLY">월정산</option>
+              <option value="QUARTERLY">분기정산</option>
+              <option value="HALF_YEARLY">반기정산</option>
+              <option value="YEARLY">연정산</option>
+            </select>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="targetPeriodMode">대상기간 설정</label>
+            <select id="targetPeriodMode" class="erp_select" required>
+              <option value="BULK">일괄설정</option>
+              <option value="ITEM">개별설정</option>
+            </select>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="paymentDate">지급일</label>
+            <input id="paymentDate" type="date" class="erp_input" required>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="paymentYearMonth">지급연월</label>
+            <input id="paymentYearMonth" type="month" class="erp_input" required>
+          </div>
+          <div class="erp_form_field">
+            <label class="erp_label" for="bonusRateOrAmount">여여지급률(%)</label>
+            <input id="bonusRateOrAmount" class="erp_input" placeholder="50% 또는 1000000">
+          </div>
+          <div class="erp_form_field erp_form_field_full">
+            <label class="erp_label" for="ledgerName">급여대장 명칭</label>
+            <input id="ledgerName" class="erp_input" required placeholder="2026년 5월 급여대장">
+          </div>
+        </div>
+
+        <!-- 정산항목 설정 -->
+        <div class="payroll_option_panel">
+          <div class="payroll_option_head">
+            <strong>정산항목 설정</strong>
+            <div class="segmented_tabs" style="margin-bottom:0;">
+              <label class="segmented_tab">
+                <input type="radio" name="settlementMode" value="ALL" checked style="display:none"> 전체
+              </label>
+              <label class="segmented_tab">
+                <input type="radio" name="settlementMode" value="SELECTED" style="display:none"> 선택
+              </label>
+            </div>
+          </div>
+          <div class="payroll_check_grid" id="settlementItems">
+            <label class="erp_checkbox_label"><input type="checkbox" class="erp_checkbox" value="YEAR_END_TAX"> <span>연말정산</span></label>
+            <label class="erp_checkbox_label"><input type="checkbox" class="erp_checkbox" value="HEALTH_INSURANCE_ADJUSTMENT"> <span>건강보험정산</span></label>
+            <label class="erp_checkbox_label"><input type="checkbox" class="erp_checkbox" value="LONG_TERM_CARE_ADJUSTMENT"> <span>장기요양보험정산</span></label>
+            <label class="erp_checkbox_label"><input type="checkbox" class="erp_checkbox" value="NATIONAL_PENSION_ADJUSTMENT"> <span>국민연금정산</span></label>
+            <label class="erp_checkbox_label"><input type="checkbox" class="erp_checkbox" value="EMPLOYMENT_INSURANCE_ADJUSTMENT"> <span>고용보험정산</span></label>
+          </div>
+        </div>
+
+        <!-- 대상사원 선택 -->
+        <div class="payroll_option_panel">
+          <div class="payroll_option_head">
+            <strong>대상사원 선택</strong>
+            <div class="segmented_tabs" style="margin-bottom:0;">
+              <label class="segmented_tab">
+                <input type="radio" name="employeeMode" value="ALL" checked style="display:none"> 전체
+              </label>
+              <label class="segmented_tab">
+                <input type="radio" name="employeeMode" value="SELECTED" style="display:none"> 선택
+              </label>
+            </div>
+          </div>
+          <div class="payroll_employee_row">
+            <button type="button" id="openEmployeeSearchButton" class="erp_btn erp_btn_secondary">
+              <i data-lucide="search"></i><span>사원 검색</span>
+            </button>
+            <span id="selectedEmployeeSummary" class="kpi_hint">전체 사원 적용</span>
+          </div>
+          <div class="payroll_selected_employees" id="selectedEmployees"></div>
+        </div>
+      </div>
+      <div class="erp_dialog_footer">
+        <button type="button" class="erp_btn erp_btn_secondary" data-close-dialog="payrollDialog">닫기</button>
+        <button type="button" id="draftSaveButton" class="erp_btn erp_btn_secondary">임시저장</button>
+        <button type="button" id="saveLedgerButton" class="erp_btn erp_btn_secondary">저장</button>
+        <button type="button" id="runCalculationButton" class="erp_btn erp_btn_primary">
+          <i data-lucide="play"></i><span>계산실행</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 사원 검색 다이얼로그 -->
+  <dialog id="employeeDialog">
+    <form method="dialog" class="erp_dialog">
+      <div class="erp_dialog_header">
+        <h3>사원 검색</h3>
+        <button type="button" data-close-dialog="employeeDialog" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body">
+        <div class="lookup_search">
+          <input id="employeeKeyword" type="search" class="erp_input" placeholder="사번, 이름, 부서, 직급">
+          <button type="button" id="employeeSearchButton" class="erp_btn erp_btn_primary">
+            <i data-lucide="search"></i>
+          </button>
+        </div>
+        <div id="employeeResults" class="lookup_results"></div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 급여대장 상세 다이얼로그 -->
+  <dialog id="detailDialog">
+    <form method="dialog" class="erp_dialog erp_dialog_wide">
+      <div class="erp_dialog_header">
+        <h3 id="detailTitle">급여대장 상세</h3>
+        <button type="button" data-close-dialog="detailDialog" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body" id="detailContent"></div>
+    </form>
+  </dialog>
+
+  <!-- 급여명세서 다이얼로그 -->
+  <dialog id="payslipDialog">
+    <form method="dialog" class="erp_dialog erp_dialog_wide">
+      <div class="erp_dialog_header">
+        <h3>급여명세서</h3>
+        <button type="button" data-close-dialog="payslipDialog" class="erp_modal_close" aria-label="닫기">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="erp_dialog_body" id="payslipContent"></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/payroll_management.js"></script>
+</body>
+</html>

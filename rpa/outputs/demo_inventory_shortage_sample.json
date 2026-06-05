@@ -1,0 +1,23 @@
+[
+  {
+    "productName": "아망티 실론 브렉퍼스트 홍차 BOP (100g)",
+    "vendorName": "(주)아망티",
+    "stockStatus": "공급 지연",
+    "expectedRestockDate": "2026-06-07",
+    "recommendedAction": "긴급 발주 우선 검토"
+  },
+  {
+    "productName": "아망티 얼그레이 블렌드 티백 (20입)",
+    "vendorName": "(주)아망티",
+    "stockStatus": "부분 재고 가용",
+    "expectedRestockDate": "2026-06-05",
+    "recommendedAction": "안전재고 이하 SKU 우선 배정"
+  },
+  {
+    "productName": "아망티 내열유리 티포트 (600ml)",
+    "vendorName": "삼우글라스",
+    "stockStatus": "정상 공급",
+    "expectedRestockDate": "2026-06-04",
+    "recommendedAction": "주간 판매 추이만 추가 확인"
+  }
+]

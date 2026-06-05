@@ -1,0 +1,108 @@
+/* ============================================================
+   trial-balance.css
+   합계잔액시산표 페이지 전용 스타일
+   - erp_components.css 기반 공통 클래스 우선 사용
+   - 트리 계층 레벨 스타일, 금액 모노스페이스 정의
+   ============================================================ */
+
+/* 트리 계층 버튼 */
+.tree-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.12s;
+  flex-shrink: 0;
+}
+
+.tree-button:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.tree-spacer {
+  display: inline-block;
+  width: 26px;
+  flex-shrink: 0;
+}
+
+/* 계정명 셀 정렬 */
+.account-name-cell {
+  display: flex;
+  align-items: center;
+}
+
+/* 계층 레벨별 스타일 */
+.erp_table .level-1 td {
+  font-weight: 700;
+  color: var(--text-primary);
+  background: #f8fafc;
+}
+
+.erp_table .level-2 td {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.erp_table .level-3 td {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.erp_table .leaf td {
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.erp_table .hidden-row {
+  display: none;
+}
+
+/* 금액 컬럼 - 모노스페이스 */
+.erp_table th.amount,
+.erp_table td.amount {
+  font-variant-numeric: tabular-nums;
+  font-family: 'DM Mono', 'Roboto Mono', monospace;
+  text-align: right;
+}
+
+/* 잔액 일치 상태 */
+.balance-ok {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.balance-warning {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* 시산표 합계 행 */
+.erp_table tfoot tr {
+  background: #f1f5f9;
+  font-weight: 700;
+}
+
+.erp_table tfoot td {
+  border-top: 2px solid var(--border);
+  font-size: 0.8125rem;
+}
+
+/* 인쇄 */
+@media print {
+  .topbar,
+  .filter_section,
+  .page_actions { display: none !important; }
+  .main_wrap { margin-left: 0 !important; }
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .erp_table_container { font-size: 0.75rem; }
+}

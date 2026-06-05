@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 거래 내역 등록</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <style>
+    .erp_table_container { position: relative; max-height: 600px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); }
+    .erp_table th { position: sticky; top: 0; background: #f1f5f9; z-index: 10; box-shadow: inset 0 -1px 0 var(--border); }
+    .table-loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 20; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-secondary); text-align: center; }
+    .kpi_card { background: var(--card-bg); border-radius: 12px; padding: 20px 24px; border: 1px solid var(--border); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+    .kpi_card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(79,70,229,0.08); border-color: var(--accent); }
+    .kpi_card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+    .kpi_card:hover::after { opacity: 1; }
+  </style>
+</head>
+
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area hr_page">
+      <!-- 헤더 -->
+      <section class="page_header">
+        <div class="page_title_area">
+          <h2>거래 내역 등록</h2>
+          <p>전표 기반 거래내역 조회 및 관리</p>
+        </div>
+        <div class="header_actions">
+          <button class="erp_btn erp_btn_primary" onclick="location.href='./voucher_management.html'" title="전표 등록">
+            <i data-lucide="plus"></i>
+            <span>전표 등록</span>
+          </button>
+          <button class="erp_btn erp_btn_secondary erp_btn_icon" title="다운로드">
+            <i data-lucide="download"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- KPI 카드 섹션 -->
+      <section class="kpi_grid">
+        <div class="kpi_card">
+          <div class="kpi_icon blue">
+            <i data-lucide="file-text"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">오늘 등록 전표</div>
+            <div class="kpi_value" id="kpi_today_count">-</div>
+          </div>
+        </div>
+
+        <div class="kpi_card">
+          <div class="kpi_icon green">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">POSTED 전표</div>
+            <div class="kpi_value" id="kpi_posted_count">-</div>
+          </div>
+        </div>
+
+        <div class="kpi_card">
+          <div class="kpi_icon orange">
+            <i data-lucide="file-text"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">DRAFT 전표</div>
+            <div class="kpi_value" id="kpi_draft_count">-</div>
+          </div>
+        </div>
+
+        <div class="kpi_card">
+          <div class="kpi_icon blue">
+            <i data-lucide="bar-chart-3"></i>
+          </div>
+          <div class="kpi_content">
+            <div class="kpi_label">총 거래 금액</div>
+            <div class="kpi_value" id="kpi_total_amount">-</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 거래 내역 섹션 -->
+      <section class="section_card">
+        <div class="section_card_header">
+          <h3>거래 내역</h3>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <select id="status_filter" class="erp_select" style="width: 140px;">
+              <option value="">전체 상태</option>
+              <option value="POSTED">POSTED</option>
+              <option value="DRAFT">DRAFT</option>
+              <option value="REQUESTED">REQUESTED</option>
+              <option value="APPROVED">APPROVED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+            <input type="text" id="search_input" class="erp_input" placeholder="거래처, 전표번호 검색..." style="width: 220px;">
+          </div>
+        </div>
+
+        <div class="erp_table_container">
+          <div class="table-loader-overlay" id="tableLoader"><div class="spinner"></div></div>
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th>전표번호</th>
+                <th>거래일자</th>
+                <th>거래처</th>
+                <th>전표유형</th>
+                <th class="amount">차변</th>
+                <th class="amount">대변</th>
+                <th>상태</th>
+                <th style="text-align: center; width: 60px;">작업</th>
+              </tr>
+            </thead>
+            <tbody id="transaction_list">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <i data-lucide="loader-2" class="animate-spin" style="width: 24px; height: 24px;"></i>
+                    <span>거래내역을 로딩 중입니다...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- 상세 정보 모달 -->
+  <div id="detail_modal" class="erp_modal_overlay">
+    <div class="erp_modal">
+      <div class="erp_modal_header">
+        <h3>거래 내역 상세</h3>
+        <button class="erp_modal_close" onclick="closeDetailModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <div class="erp_modal_body">
+        <div class="erp_form_group">
+          <label class="erp_label">전표번호</label>
+          <span id="detail_number" class="erp_input" style="display: flex; align-items: center; background-color: #f8fafc;">-</span>
+        </div>
+        <div class="erp_form_group">
+          <label class="erp_label">거래일자</label>
+          <span id="detail_date" class="erp_input" style="display: flex; align-items: center; background-color: #f8fafc;">-</span>
+        </div>
+        <div class="erp_form_group">
+          <label class="erp_label">거래처</label>
+          <span id="detail_vendor" class="erp_input" style="display: flex; align-items: center; background-color: #f8fafc;">-</span>
+        </div>
+        <div class="erp_form_group">
+          <label class="erp_label">상태</label>
+          <div style="height: 38px; display: flex; align-items: center;">
+            <span id="detail_status" class="status_badge success">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="erp_modal_footer">
+        <button class="erp_btn erp_btn_secondary" onclick="closeDetailModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/transactions.js"></script>
+</body>
+
+</html>

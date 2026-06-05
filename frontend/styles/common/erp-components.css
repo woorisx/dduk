@@ -1,0 +1,165 @@
+/* ERP Common Components Styling */
+
+/* Badge Styles */
+.erp_badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.erp_badge_success { background-color: #e6fffa; color: #047481; border: 1px solid #b2f5ea; }
+.erp_badge_warning { background-color: #fffaf0; color: #9c4221; border: 1px solid #feebc8; }
+.erp_badge_error { background-color: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+.erp_badge_info { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+.erp_badge_gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #edf2f7; }
+
+/* Table Base Styles */
+.erp_table_container {
+    width: 100%;
+    overflow-x: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.erp_table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.erp_table th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.erp_table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.erp_table tr:hover {
+    background-color: #f1f5f9;
+}
+
+.erp_table tr.is_selected {
+    background-color: #eff6ff;
+}
+
+/* Form Controls */
+.erp_input, .erp_select {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #2d3748;
+    transition: border-color 0.2s;
+}
+
+.erp_input:focus, .erp_select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+/* Modal Overlay */
+.erp_modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s;
+}
+
+.erp_modal_overlay.is_active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.erp_modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 600px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.erp_modal_header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.erp_modal_header h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.erp_modal_body {
+    padding: 24px;
+}
+
+.erp_modal_footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Button Styles */
+.erp_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.erp_button_primary { background-color: #3182ce; color: #fff; }
+.erp_button_primary:hover { background-color: #2b6cb0; }
+
+.erp_button_secondary { background-color: #fff; color: #4a5568; border-color: #cbd5e0; }
+.erp_button_secondary:hover { background-color: #f7fafc; }
+
+.erp_button_danger { background-color: #e53e3e; color: #fff; }
+.erp_button_danger:hover { background-color: #c53030; }
+
+/* States */
+.erp_loading_state, .erp_empty_state {
+    padding: 48px;
+    text-align: center;
+    color: #718096;
+}

@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=VALUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.H2Dialect
+
+  sql:
+    init:
+      mode: always
+
+jwt:
+  secret: test-secret-key-dduk-erp-system-for-testing-purpose-only-256bit
+  expiration: 86400000
+
+ai-server:
+  url: http://localhost:8000
+
+rpa-server:
+  url: http://localhost:5050
+  callback-token: test-rpa-token
+
+logging:
+  level:
+    com.dduk: WARN
+    org.springframework: WARN

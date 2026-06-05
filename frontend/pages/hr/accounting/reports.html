@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 재무제표</title>
+  <meta name="description" content="기간별 대차대조표, 손익계산서, 재무상태표를 조회합니다.">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../../styles/common/dashboard.css">
+  <link rel="stylesheet" href="../../../styles/common/erp_components.css">
+  <style>
+    .erp_table_container { position: relative; max-height: 600px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); }
+    .erp_table th { position: sticky; top: 0; background: #f1f5f9; z-index: 10; box-shadow: inset 0 -1px 0 var(--border); }
+    .table-loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 20; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: var(--text-secondary); text-align: center; }
+    .kpi_card { background: var(--card-bg); border-radius: 12px; padding: 20px 24px; border: 1px solid var(--border); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+    .kpi_card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(79,70,229,0.08); border-color: var(--accent); }
+    .kpi_card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+    .kpi_card:hover::after { opacity: 1; }
+  </style>
+</head>
+<body>
+  <aside data-dduk-sidebar></aside>
+  <div class="main_wrap">
+    <header class="topbar">
+      <button class="sidebar_icon_btn dduk-inline-027" onclick="toggleSidebar()" id="mobile_menu_btn" aria-label="메뉴">
+        <i class="dduk-inline-028" data-lucide="menu"></i>
+      </button>
+      <div class="dduk-inline-029">
+        <div class="dduk-inline-030">
+          <i class="dduk-inline-031" data-lucide="search"></i>
+          <input class="dduk-inline-032" type="text" placeholder="메뉴, 거래처, 문서 검색..." aria-label="검색">
+        </div>
+      </div>
+      <div class="dduk-inline-033">
+        <button class="sidebar_icon_btn" aria-label="알림"><i class="dduk-inline-034" data-lucide="bell"></i></button>
+        <button class="sidebar_icon_btn" aria-label="프로필"><i class="dduk-inline-034" data-lucide="user"></i></button>
+      </div>
+    </header>
+
+    <main class="content_area">
+      <section class="page_header">
+        <div class="page_title_area">
+          <h2>재무제표</h2>
+          <p>기간별 대차대조표, 손익계산서, 재무상태표를 조회합니다.</p>
+        </div>
+        <div class="page_actions">
+          <button id="btn_refresh_reports" type="button" class="erp_btn erp_btn_secondary">
+            <i data-lucide="refresh-cw"></i><span>새로고침</span>
+          </button>
+          <button id="btn_export_excel" type="button" class="erp_btn erp_btn_secondary">
+            <i data-lucide="download"></i><span>Excel</span>
+          </button>
+          <button id="btn_print" type="button" class="erp_btn erp_btn_secondary">
+            <i data-lucide="printer"></i><span>인쇄</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 필터 -->
+      <section class="filter_section">
+        <div class="filter_grid">
+          <div class="filter_field">
+            <label for="filter_year">회계연도</label>
+            <select class="erp_select" id="filter_year">
+              <option value="">전체</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+          <div class="filter_field">
+            <label for="filter_month">회계월</label>
+            <select class="erp_select" id="filter_month">
+              <option value="">전체</option>
+              <option value="1">1월</option>
+              <option value="2">2월</option>
+              <option value="3">3월</option>
+              <option value="4">4월</option>
+              <option value="5">5월</option>
+              <option value="6">6월</option>
+              <option value="7">7월</option>
+              <option value="8">8월</option>
+              <option value="9">9월</option>
+              <option value="10">10월</option>
+              <option value="11">11월</option>
+              <option value="12">12월</option>
+            </select>
+          </div>
+          <div class="filter_field">
+            <label for="report_type">리포트 유형</label>
+            <select class="erp_select" id="report_type">
+              <option value="balance-sheet" selected>재무상태표</option>
+              <option value="profit-loss">손익계산서</option>
+            </select>
+          </div>
+          <div class="filter_field" style="display:flex; align-items:flex-end;">
+            <button class="erp_btn erp_btn_primary" id="btn_apply_filter" type="button" style="width:100%">
+              <i data-lucide="search"></i><span>조회</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI 요약 -->
+      <section class="kpi_grid">
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총자산 / 차변</div>
+            <div class="kpi_value" id="kpi_total_assets">-</div>
+            <div class="kpi_hint">조회 기준 합계</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총부채 / 대변</div>
+            <div class="kpi_value" id="kpi_total_liabilities">-</div>
+            <div class="kpi_hint">조회 기준 합계</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">순이익 / 차액</div>
+            <div class="kpi_value" id="kpi_net_income">-</div>
+            <div class="kpi_hint" id="net_income_status">-</div>
+          </div>
+        </div>
+        <div class="kpi_card">
+          <div class="kpi_content">
+            <div class="kpi_label">총매출</div>
+            <div class="kpi_value" id="kpi_total_revenue">-</div>
+            <div class="kpi_hint">손익계산서 기준</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 탭 네비게이션 -->
+      <div class="segmented_tabs" id="reportTabs" role="tablist">
+        <button class="segmented_tab active" role="tab" data-tab="balance-sheet" id="tab_balance">재무상태표</button>
+        <button class="segmented_tab" role="tab" data-tab="profit-loss" id="tab_profit">손익계산서</button>
+      </div>
+
+      <!-- 메인 리포트 테이블 -->
+      <section class="section_card">
+        <div class="section_card_header">
+          <h3 id="report_title">손익계산서</h3>
+          <span class="status_badge success" id="report_badge">Profit & Loss</span>
+        </div>
+        <div class="erp_table_container" id="report_table_container">
+          <table class="erp_table">
+            <thead>
+              <tr>
+                <th>계정코드</th>
+                <th>계정명</th>
+                <th>구분</th>
+                <th class="amount">차변 합계</th>
+                <th class="amount">대변 합계</th>
+                <th class="amount">잔액</th>
+              </tr>
+            </thead>
+            <tbody id="report_rows"></tbody>
+            <tfoot>
+              <tr class="erp_table_total">
+                <td colspan="3">합계</td>
+                <td class="amount" id="total_debit">0</td>
+                <td class="amount" id="total_credit">0</td>
+                <td class="amount" id="total_balance">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div id="empty_state" class="erp_empty_state" style="display:none">
+          <i data-lucide="file-search"></i>
+          <p>조회된 데이터가 없습니다.</p>
+        </div>
+      </section>
+
+      <!-- 요약 카드 -->
+      <div class="kpi_grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="section_card">
+          <div class="section_card_header">
+            <h3>매출</h3>
+            <span class="status_badge success">Revenue</span>
+          </div>
+          <div class="kpi_value" id="summary_revenue" style="padding: 12px 0; font-size: 1.5rem;">-</div>
+          <div class="kpi_hint">총매출액</div>
+        </div>
+        <div class="section_card">
+          <div class="section_card_header">
+            <h3>비용</h3>
+            <span class="status_badge danger">Expense</span>
+          </div>
+          <div class="kpi_value" id="summary_expenses" style="padding: 12px 0; font-size: 1.5rem;">-</div>
+          <div class="kpi_hint">총비용액</div>
+        </div>
+        <div class="section_card">
+          <div class="section_card_header">
+            <h3>요약</h3>
+            <span class="status_badge muted" id="operating_income_badge">-</span>
+          </div>
+          <div class="kpi_value" id="summary_operating_income" style="padding: 12px 0; font-size: 1.5rem;">-</div>
+          <div class="kpi_hint">선택 리포트 기준</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div class="loading_overlay" id="loading_overlay" style="display:none">
+    <div class="loading_spinner"></div>
+  </div>
+
+  <script src="../../../services/common/apiClient.js"></script>
+  <script src="../../../services/common/sidebar.js"></script>
+  <script src="../../../assets/js/accounting/reports.js"></script>
+</body>
+</html>

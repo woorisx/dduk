@@ -1,0 +1,46 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-dark: #570808;
+  --primary-light: #F8F7F7;
+  --accent-gray: #8B8B8B;
+  --accent-light-gray: #D4D4D4;
+  --text-dark: #2C2C2C;
+  --text-light: #7A7A7A;
+  --border-light: #E5E5E5;
+  --bg-white: #FFFFFF;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --transition: all 0.3s ease-in-out;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  /* background-color: var(--primary-light); */
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* ==========================================
+   Account-Security Page Standard Style Unified
+   ========================================== */
+
+/* 1. content_area 패딩 및 너비/마진 통일 (선택자 구체성 강화를 통해 !important 없이 Tailwind 극복) */
+body .main_wrap main.content_area {
+    padding: 24px;
+    max-width: none;
+    margin: 0;
+}
+
+/* 2. content_area 자식 간격 통일 (space-y-8 = 32px 기준) */
+body .main_wrap main.content_area > * + * {
+    margin-top: 32px;
+}
+

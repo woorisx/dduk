@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDUK ERP - 로그인</title>
+  <meta name="description" content="DDUK ERP 로그인">
+  <link rel="stylesheet" href="styles/admin/login.css">
+</head>
+<body>
+  <main class="login-page" aria-label="DDUK ERP 로그인">
+    <aside class="intro-panel" aria-label="DDUK ERP 소개">
+      <div class="intro-logo">
+        <span class="logo-name">DDUK ERP</span>
+      </div>
+
+      <div class="intro-headline">
+        <h1>스마트한 기업 운영의 시작</h1>
+        <p>회계, 재고, 구매, 인사 데이터를<br>하나의 시스템으로 통합 관리하세요.</p>
+      </div>
+
+      <ul class="feature-list" aria-label="주요 기능">
+        <li class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <strong>통합 데이터 관리</strong>
+            <span>모든 업무 데이터를 실시간으로 통합 관리</span>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2"></rect>
+              <line x1="9" y1="7" x2="15" y2="7"></line>
+              <line x1="9" y1="11" x2="15" y2="11"></line>
+              <line x1="9" y1="15" x2="13" y2="15"></line>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <strong>업무 효율 향상</strong>
+            <span>반복 업무 자동화로 생산성 극대화</span>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <strong>안정적인 접근 제어</strong>
+            <span>검증된 보안과 안정적인 시스템 운영</span>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <strong>빠른 의사결정 지원</strong>
+            <span>정확한 데이터 기반의 빠른 의사결정 지원</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="system-status" role="status">
+        <div class="status-row">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span class="status-label">System Online</span>
+        </div>
+        <span class="status-version">v2.4 Enterprise Edition</span>
+      </div>
+    </aside>
+
+    <section class="login-card" aria-label="로그인 폼">
+      <header class="login-header">
+        <h1>로그인</h1>
+        <p>시스템 접근을 위해 계정 정보를 입력하세요.</p>
+      </header>
+
+      <form id="loginForm" class="login-form">
+        <div class="input-group">
+          <label for="companyCode">회사 코드</label>
+          <div class="field-control">
+            <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 21h18"></path>
+              <path d="M5 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path>
+              <path d="M9 7h1"></path>
+              <path d="M14 7h1"></path>
+              <path d="M9 11h1"></path>
+              <path d="M14 11h1"></path>
+              <path d="M9 15h1"></path>
+              <path d="M14 15h1"></path>
+            </svg>
+            <input type="text" id="companyCode" name="companyCode" placeholder="회사 코드" autocomplete="organization" value="DDK-AX92K">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="loginId">아이디</label>
+          <div class="field-control">
+            <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 21a8 8 0 0 0-16 0"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <input type="text" id="loginId" name="loginId" required placeholder="아이디" autocomplete="username">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">비밀번호</label>
+          <div class="field-control password-field">
+            <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input type="password" id="password" name="password" required placeholder="비밀번호" autocomplete="current-password">
+            <button type="button" class="password-toggle" aria-label="비밀번호 보기" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.25 12s3.5-6.25 9.75-6.25S21.75 12 21.75 12s-3.5 6.25-9.75 6.25S2.25 12 2.25 12Z"></path>
+                <circle cx="12" cy="12" r="2.5"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" name="saveCompanyCode" checked>
+            <span>회사코드 저장</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="rememberId">
+            <span>아이디 저장</span>
+          </label>
+        </div>
+
+        <p class="security-note">공용 PC에서는 로그인 정보를 저장하지 마세요</p>
+
+        <button type="submit" id="loginBtn">
+          <span>로그인</span>
+        </button>
+      </form>
+
+      <p id="message" class="message" aria-live="polite"></p>
+
+      <footer class="login-footer">
+        <span>모든 접속 기록은 저장됩니다</span>
+      </footer>
+    </section>
+  </main>
+
+  <script src="services/admin/auth.js"></script>
+</body>
+</html>
