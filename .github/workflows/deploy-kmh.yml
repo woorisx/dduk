@@ -138,6 +138,7 @@ jobs:
           BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
           AI_SERVER_IMAGE: ${{ env.AI_SERVER_IMAGE }}
           RPA_SERVER_IMAGE: ${{ env.RPA_SERVER_IMAGE }}
+          DEPLOY_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           CLEAN_HOST=$(echo "$EC2_HOST" | tr -d '\r' | xargs)
@@ -146,24 +147,63 @@ jobs:
           [ -n "$CLEAN_PORT" ] || CLEAN_PORT=22
           CLEAN_DEPLOY_PATH=$(echo "$EC2_DEPLOY_PATH" | tr -d '\r' | xargs)
           CLEAN_GHCR_USERNAME=$(echo "$GHCR_USERNAME" | tr -d '\r' | xargs)
+          CLEAN_DEPLOY_BRANCH=$(echo "$DEPLOY_BRANCH" | tr -d '\r' | xargs)
           
           ssh -o IdentitiesOnly=yes -i ~/.ssh/dduk-erp-key.pem -p "$CLEAN_PORT" "$CLEAN_USER@$CLEAN_HOST" \
-            "export EC2_DEPLOY_PATH='$CLEAN_DEPLOY_PATH' GHCR_USERNAME='$CLEAN_GHCR_USERNAME' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' BACKEND_IMAGE='$BACKEND_IMAGE' AI_SERVER_IMAGE='$AI_SERVER_IMAGE' RPA_SERVER_IMAGE='$RPA_SERVER_IMAGE'; bash -s" <<'EOF'
+            "export EC2_DEPLOY_PATH='$CLEAN_DEPLOY_PATH' DEPLOY_BRANCH='$CLEAN_DEPLOY_BRANCH' GHCR_USERNAME='$CLEAN_GHCR_USERNAME' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' BACKEND_IMAGE='$BACKEND_IMAGE' AI_SERVER_IMAGE='$AI_SERVER_IMAGE' RPA_SERVER_IMAGE='$RPA_SERVER_IMAGE'; bash -s" <<'EOF'
             set -euo pipefail
             cd "$EC2_DEPLOY_PATH"
 
-            trap 'docker compose --env-file .env.aws -f docker-compose.deploy.yml logs --tail=100 backend ai-server rpa-server || true' ERR
+            install_docker() {
+              if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+                return 0
+              fi
+
+              if ! command -v sudo >/dev/null 2>&1; then
+                echo "sudo is required to install Docker on this EC2 instance." >&2
+                return 1
+              fi
+
+              sudo apt-get update
+              sudo apt-get install -y ca-certificates curl gnupg
+              sudo install -m 0755 -d /etc/apt/keyrings
+
+              if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+                sudo chmod a+r /etc/apt/keyrings/docker.gpg
+              fi
+
+              . /etc/os-release
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+              sudo apt-get update
+              sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              sudo systemctl enable --now docker
+            }
+
+            install_docker
+
+            DOCKER_CMD=(docker)
+            if ! docker info >/dev/null 2>&1; then
+              DOCKER_CMD=(sudo docker)
+              "${DOCKER_CMD[@]}" info >/dev/null
+            fi
+
+            docker_cmd() {
+              "${DOCKER_CMD[@]}" "$@"
+            }
+
+            trap 'docker_cmd compose --env-file .env.aws -f docker-compose.deploy.yml logs --tail=100 backend ai-server rpa-server || true' ERR
 
             git fetch origin
-            git checkout kmh
-            git pull --ff-only origin kmh
+            git checkout "$DEPLOY_BRANCH"
+            git pull --ff-only origin "$DEPLOY_BRANCH"
 
-            echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+            echo "$GHCR_READ_TOKEN" | docker_cmd login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 
-            docker compose --env-file .env.aws -f docker-compose.deploy.yml config
-            docker compose --env-file .env.aws -f docker-compose.deploy.yml pull
-            docker compose --env-file .env.aws -f docker-compose.deploy.yml up -d --force-recreate
-            docker compose --env-file .env.aws -f docker-compose.deploy.yml ps
+            docker_cmd compose --env-file .env.aws -f docker-compose.deploy.yml config
+            docker_cmd compose --env-file .env.aws -f docker-compose.deploy.yml pull
+            docker_cmd compose --env-file .env.aws -f docker-compose.deploy.yml up -d --force-recreate
+            docker_cmd compose --env-file .env.aws -f docker-compose.deploy.yml ps
 
             wait_for_http() {
               local url="$1"
