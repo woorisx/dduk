@@ -57,6 +57,36 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+def loadEnvFile(File envFile) {
+    if (!envFile.isFile()) {
+        return [:]
+    }
+
+    envFile.readLines('UTF-8')
+        .collect { it.trim() }
+        .findAll { it && !it.startsWith('#') && it.contains('=') }
+        .collectEntries { line ->
+            def index = line.indexOf('=')
+            def key = line.substring(0, index).trim()
+            def value = line.substring(index + 1).trim()
+            if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+                value = value.substring(1, value.length() - 1)
+            }
+            [(key): value]
+        }
+}
+
+tasks.named('bootRun') {
+    [
+        file('../.env.aws'),
+        file('../.env.production'),
+        file('.env.aws'),
+        file('.env.production')
+    ].each { envFile ->
+        environment loadEnvFile(envFile)
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
