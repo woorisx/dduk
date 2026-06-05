@@ -139,6 +139,25 @@ jobs:
           AI_SERVER_IMAGE: ${{ env.AI_SERVER_IMAGE }}
           RPA_SERVER_IMAGE: ${{ env.RPA_SERVER_IMAGE }}
           DEPLOY_BRANCH: ${{ github.ref_name }}
+          DB_URL: ${{ secrets.DB_URL || vars.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME || vars.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || vars.DB_PASSWORD }}
+          FRONTEND_PATH: ${{ secrets.FRONTEND_PATH || vars.FRONTEND_PATH }}
+          APP_CORS_ALLOWED_ORIGIN_PATTERNS: ${{ secrets.APP_CORS_ALLOWED_ORIGIN_PATTERNS || vars.APP_CORS_ALLOWED_ORIGIN_PATTERNS }}
+          JPA_DDL_AUTO: ${{ secrets.JPA_DDL_AUTO || vars.JPA_DDL_AUTO }}
+          JPA_SHOW_SQL: ${{ secrets.JPA_SHOW_SQL || vars.JPA_SHOW_SQL }}
+          JPA_FORMAT_SQL: ${{ secrets.JPA_FORMAT_SQL || vars.JPA_FORMAT_SQL }}
+          SQL_INIT_MODE: ${{ secrets.SQL_INIT_MODE || vars.SQL_INIT_MODE }}
+          SQL_INIT_CONTINUE_ON_ERROR: ${{ secrets.SQL_INIT_CONTINUE_ON_ERROR || vars.SQL_INIT_CONTINUE_ON_ERROR }}
+          ACCOUNTING_SEED: ${{ secrets.ACCOUNTING_SEED || vars.ACCOUNTING_SEED }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || vars.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION || vars.JWT_EXPIRATION }}
+          RPA_CALLBACK_TOKEN: ${{ secrets.RPA_CALLBACK_TOKEN || vars.RPA_CALLBACK_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || vars.GEMINI_MODEL }}
+          PORT: ${{ secrets.PORT || vars.PORT }}
+          AI_SERVER_PORT: ${{ secrets.AI_SERVER_PORT || vars.AI_SERVER_PORT }}
+          RPA_SERVER_PORT: ${{ secrets.RPA_SERVER_PORT || vars.RPA_SERVER_PORT }}
         run: |
           set -euo pipefail
           CLEAN_HOST=$(echo "$EC2_HOST" | tr -d '\r' | xargs)
@@ -148,6 +167,35 @@ jobs:
           CLEAN_DEPLOY_PATH=$(echo "$EC2_DEPLOY_PATH" | tr -d '\r' | xargs)
           CLEAN_GHCR_USERNAME=$(echo "$GHCR_USERNAME" | tr -d '\r' | xargs)
           CLEAN_DEPLOY_BRANCH=$(echo "$DEPLOY_BRANCH" | tr -d '\r' | xargs)
+
+          umask 077
+          cat > .env.aws <<EOF_ENV
+          DB_URL=${DB_URL}
+          DB_USERNAME=${DB_USERNAME}
+          DB_PASSWORD=${DB_PASSWORD}
+          FRONTEND_PATH=${FRONTEND_PATH:-classpath:/static/}
+          APP_CORS_ALLOWED_ORIGIN_PATTERNS=${APP_CORS_ALLOWED_ORIGIN_PATTERNS}
+          JPA_DDL_AUTO=${JPA_DDL_AUTO:-update}
+          JPA_SHOW_SQL=${JPA_SHOW_SQL:-false}
+          JPA_FORMAT_SQL=${JPA_FORMAT_SQL:-false}
+          SQL_INIT_MODE=${SQL_INIT_MODE:-always}
+          SQL_INIT_CONTINUE_ON_ERROR=${SQL_INIT_CONTINUE_ON_ERROR:-true}
+          ACCOUNTING_SEED=${ACCOUNTING_SEED:-true}
+          JWT_SECRET=${JWT_SECRET}
+          JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
+          RPA_CALLBACK_TOKEN=${RPA_CALLBACK_TOKEN}
+          GEMINI_API_KEY=${GEMINI_API_KEY}
+          GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
+          PORT=${PORT:-8080}
+          AI_SERVER_PORT=${AI_SERVER_PORT:-5000}
+          RPA_SERVER_PORT=${RPA_SERVER_PORT:-5050}
+          BACKEND_IMAGE=${BACKEND_IMAGE}
+          AI_SERVER_IMAGE=${AI_SERVER_IMAGE}
+          RPA_SERVER_IMAGE=${RPA_SERVER_IMAGE}
+          EOF_ENV
+
+          ssh -o IdentitiesOnly=yes -i ~/.ssh/dduk-erp-key.pem -p "$CLEAN_PORT" "$CLEAN_USER@$CLEAN_HOST" "mkdir -p '$CLEAN_DEPLOY_PATH'"
+          scp -o IdentitiesOnly=yes -i ~/.ssh/dduk-erp-key.pem -P "$CLEAN_PORT" .env.aws "$CLEAN_USER@$CLEAN_HOST:$CLEAN_DEPLOY_PATH/.env.aws"
           
           ssh -o IdentitiesOnly=yes -i ~/.ssh/dduk-erp-key.pem -p "$CLEAN_PORT" "$CLEAN_USER@$CLEAN_HOST" \
             "export EC2_DEPLOY_PATH='$CLEAN_DEPLOY_PATH' DEPLOY_BRANCH='$CLEAN_DEPLOY_BRANCH' GHCR_USERNAME='$CLEAN_GHCR_USERNAME' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' BACKEND_IMAGE='$BACKEND_IMAGE' AI_SERVER_IMAGE='$AI_SERVER_IMAGE' RPA_SERVER_IMAGE='$RPA_SERVER_IMAGE'; bash -s" <<'EOF'
@@ -195,8 +243,7 @@ jobs:
             trap 'docker_cmd compose --env-file .env.aws -f docker-compose.deploy.yml logs --tail=100 backend ai-server rpa-server || true' ERR
 
             git fetch origin
-            git checkout "$DEPLOY_BRANCH"
-            git pull --ff-only origin "$DEPLOY_BRANCH"
+            git reset --hard "origin/$DEPLOY_BRANCH"
 
             echo "$GHCR_READ_TOKEN" | docker_cmd login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 
