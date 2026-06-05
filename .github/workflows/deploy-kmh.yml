@@ -168,6 +168,26 @@ jobs:
           CLEAN_GHCR_USERNAME=$(echo "$GHCR_USERNAME" | tr -d '\r' | xargs)
           CLEAN_DEPLOY_BRANCH=$(echo "$DEPLOY_BRANCH" | tr -d '\r' | xargs)
 
+          ssh -o IdentitiesOnly=yes -i ~/.ssh/dduk-erp-key.pem -p "$CLEAN_PORT" "$CLEAN_USER@$CLEAN_HOST" \
+            "export EC2_DEPLOY_PATH='$CLEAN_DEPLOY_PATH' DEPLOY_BRANCH='$CLEAN_DEPLOY_BRANCH'; bash -s" <<'EOF_SYNC'
+            set -euo pipefail
+
+            if [ -d "$EC2_DEPLOY_PATH/.git" ]; then
+              cd "$EC2_DEPLOY_PATH"
+              git fetch origin
+            else
+              mkdir -p "$(dirname "$EC2_DEPLOY_PATH")"
+              rm -rf "$EC2_DEPLOY_PATH"
+              git clone https://github.com/woorisx/dduk.git "$EC2_DEPLOY_PATH"
+              cd "$EC2_DEPLOY_PATH"
+              git fetch origin
+            fi
+
+            git reset --hard "origin/$DEPLOY_BRANCH"
+            git clean -fd -e .env.aws -e .env.production
+            echo "EC2 source synced to origin/$DEPLOY_BRANCH at $(git rev-parse --short HEAD)"
+          EOF_SYNC
+
           required_env() {
             local name="$1"
             if [ -z "${!name:-}" ]; then
